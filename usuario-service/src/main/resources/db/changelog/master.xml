@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <!-- Number types -->
+    <property name="number_15_2" value="NUMERIC(15, 2)" dbms="postgresql"/>
+    <property name="number_10_2" value="NUMERIC(10, 2)" dbms="postgresql"/>
+    <property name="number_18_6" value="NUMERIC(18, 6)" dbms="postgresql"/>
+
+    <!-- Integer types -->
+    <property name="integer" value="INTEGER" dbms="postgresql"/>
+
+    <!-- Date/Time types -->
+    <property name="date" value="date" dbms="postgresql"/>
+    <property name="timestamp" value="TIMESTAMP" dbms="postgresql"/>
+
+    <!-- Char types -->
+    <property name="char_1" value="CHARACTER(1)" dbms="postgresql"/>
+
+    <!-- Varchar types -->
+    <property name="varchar_6" value="CHARACTER VARYING(6)" dbms="postgresql"/>
+    <property name="varchar_7" value="CHARACTER VARYING(7)" dbms="postgresql"/>
+    <property name="varchar_10" value="CHARACTER VARYING(10)" dbms="postgresql"/>
+    <property name="varchar_15" value="CHARACTER VARYING(15)" dbms="postgresql"/>
+    <property name="varchar_20" value="CHARACTER VARYING(20)" dbms="postgresql"/>
+    <property name="varchar_50" value="CHARACTER VARYING(50)" dbms="postgresql"/>
+    <property name="varchar_64" value="CHARACTER VARYING(64)" dbms="postgresql"/>
+    <property name="varchar_100" value="CHARACTER VARYING(100)" dbms="postgresql"/>
+    <property name="varchar_255" value="CHARACTER VARYING(255)" dbms="postgresql"/>
+    <property name="varchar_500" value="CHARACTER VARYING(500)" dbms="postgresql"/>
+
+    <!-- Text types -->
+    <property name="binary" value="BYTEA" dbms="postgresql"/>
+
+    <includeAll path="changes" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
