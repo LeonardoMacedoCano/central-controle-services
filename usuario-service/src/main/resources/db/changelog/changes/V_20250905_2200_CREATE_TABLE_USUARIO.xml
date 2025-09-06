@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-usuario" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela usuario ja existe">
+            <not>
+                <tableExists tableName="usuario"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="usuario">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkusuario"/>
+            </column>
+            <column name="username" type="${varchar_255}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="senha" type="${varchar_255}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datainclusao" type="${date}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ativo" type="${char_1}" defaultValue="S">
+                <constraints nullable="false"/>
+            </column>
+            <column name="icone" type="${binary}"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
