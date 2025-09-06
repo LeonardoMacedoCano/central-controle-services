@@ -1,4 +1,4 @@
-package br.com.lcano.usuario_service;
+package br.com.lcano.usuario;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
