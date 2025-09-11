@@ -2,28 +2,22 @@ package br.com.lcano.usuario.security;
 
 import br.com.lcano.usuario.repository.UsuarioRepository;
 import br.com.lcano.usuario.service.TokenService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletResponse;
-
 @Component
+@AllArgsConstructor
 public class TokenInterceptor implements HandlerInterceptor {
-    @Autowired
-    private final TokenService tokenService;
 
-    @Autowired
+    private final TokenService tokenService;
     private final UsuarioRepository usuarioRepository;
 
-    public TokenInterceptor(TokenService tokenService, UsuarioRepository usuarioRepository) {
-        this.tokenService = tokenService;
-        this.usuarioRepository = usuarioRepository;
-    }
-
     @Override
-    public boolean preHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
         if (isPathExemptFromAuthentication(path)) {
@@ -33,12 +27,11 @@ public class TokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            String usernameToken = tokenService.validateToken(token);
+            String username = tokenService.validateToken(token);
 
-            if (usernameToken != null && !usernameToken.isEmpty()) {
-                UserDetails usuario = usuarioRepository.findByUsername(usernameToken);
+            if (username != null && !username.isEmpty()) {
+                UserDetails usuario = usuarioRepository.findByUsername(username);
                 request.setAttribute("usuario", usuario);
-
                 return true;
             }
         }
@@ -51,5 +44,4 @@ public class TokenInterceptor implements HandlerInterceptor {
         return (path.startsWith("/api/auth") && (path.length() == 9 || path.charAt(9) == '/')) ||
                 path.equals("/api/tema/default");
     }
-
 }

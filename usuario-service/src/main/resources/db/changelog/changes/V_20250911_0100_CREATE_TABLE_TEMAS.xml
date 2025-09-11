@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-tema" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela tema ja existe">
+            <not>
+                <tableExists tableName="tema"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tema">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pktema"/>
+            </column>
+            <column name="title" type="${varchar_15}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="primarycolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secondarycolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tertiarycolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quaternarycolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="whitecolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="blackcolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="graycolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="successcolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="infocolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warningcolor" type="${varchar_7}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isdefault" type="${char_1}" defaultValue="N">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idusuario" type="${integer}"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="tema"
+                                 baseColumnNames="idusuario"
+                                 constraintName="fktemausuario"
+                                 referencedTableName="usuario"
+                                 referencedColumnNames="id"/>
+
+        <addUniqueConstraint tableName="tema"
+                             columnNames="idusuario,title"
+                             constraintName="uktemausuario"/>
+    </changeSet>
+
+    <changeSet id="add-column-idtema-table-usuario" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A coluna idtema da tabela usuario ja existe">
+            <not>
+                <columnExists tableName="usuario" columnName="idtema"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="usuario">
+            <column name="idtema" type="${integer}" />
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="usuario"
+                                 baseColumnNames="idtema"
+                                 constraintName="fkusuariotema"
+                                 referencedTableName="tema"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="insert-system-themes" author="lcano">
+        <insert tableName="tema">
+            <column name="title" value="darkCarbonGreen"/>
+            <column name="primarycolor" value="#1C1C1C"/>
+            <column name="secondarycolor" value="#2E2E2E"/>
+            <column name="tertiarycolor" value="#505050"/>
+            <column name="quaternarycolor" value="#2ed22e"/>
+            <column name="whitecolor" value="#F8F8F2"/>
+            <column name="blackcolor" value="#000"/>
+            <column name="graycolor" value="#A9A9A9"/>
+            <column name="successcolor" value="#008000"/>
+            <column name="infocolor" value="#007BFF"/>
+            <column name="warningcolor" value="#FF4500"/>
+            <column name="isdefault" value="N"/>
+        </insert>
+
+        <insert tableName="tema">
+            <column name="title" value="darkOnyxAmber"/>
+            <column name="primarycolor" value="#1C1C1C"/>
+            <column name="secondarycolor" value="#2E2E2E"/>
+            <column name="tertiarycolor" value="#505050"/>
+            <column name="quaternarycolor" value="#FFC107"/>
+            <column name="whitecolor" value="#F8F8F2"/>
+            <column name="blackcolor" value="#000"/>
+            <column name="graycolor" value="#A9A9A9"/>
+            <column name="successcolor" value="#008000"/>
+            <column name="infocolor" value="#007BFF"/>
+            <column name="warningcolor" value="#FF4500"/>
+            <column name="isdefault" value="N"/>
+        </insert>
+
+        <insert tableName="tema">
+            <column name="title" value="draculaDark"/>
+            <column name="primarycolor" value="#282A36"/>
+            <column name="secondarycolor" value="#44475A"/>
+            <column name="tertiarycolor" value="#5E5E89"/>
+            <column name="quaternarycolor" value="#a478e3"/>
+            <column name="whitecolor" value="#F8F8F2"/>
+            <column name="blackcolor" value="#000"/>
+            <column name="graycolor" value="#6272A4"/>
+            <column name="successcolor" value="#50FA7B"/>
+            <column name="infocolor" value="#8BE9FD"/>
+            <column name="warningcolor" value="#FF5555"/>
+            <column name="isdefault" value="S"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

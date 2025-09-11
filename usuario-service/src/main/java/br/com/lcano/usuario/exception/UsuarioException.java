@@ -1,54 +1,50 @@
 package br.com.lcano.usuario.exception;
 
+public abstract class UsuarioException extends RuntimeException {
 
-public class UsuarioException extends RuntimeException {
-    private static final String MSG_USUARIO_NAO_ENCONTRADO = "Usuário não encontrado.";
-    private static final String MSG_USUARIO_JA_CADASTRADO = "Usuário já cadastrado.";
-    public static final String MSG_CREDENCIAIS_INVALIDAS = "Credenciais inválidas.";
-    private static final String MSG_USUARIO_DESATIVADO = "Usuário desativado.";
-    private static final String MSG_ERRO_GERAR_TOKEN = "Erro ao gerar Token.";
-    private static final String MSG_TOKEN_EXPIRADO_OU_INVALIDO = "Token expirado ou inválido.";
-    public static final String MSG_SENHA_ATUAL_INCORRETA = "A senha atual fornecida está incorreta. Verifique e tente novamente.";
+    public UsuarioException(String message) {
+        super(message);
+    }
 
-    public static class UsuarioNaoEncontrado extends RuntimeException {
+    public static class UsuarioNaoEncontrado extends UsuarioException {
         public UsuarioNaoEncontrado() {
-            super(MSG_USUARIO_NAO_ENCONTRADO);
+            super("Usuário não encontrado.");
         }
     }
 
-    public static class UsuarioJaCadastrado extends RuntimeException {
+    public static class UsuarioJaCadastrado extends UsuarioException {
         public UsuarioJaCadastrado() {
-            super(MSG_USUARIO_JA_CADASTRADO);
+            super("Usuário já cadastrado.");
         }
     }
 
-    public static class UsuarioDesativado extends RuntimeException {
-        public UsuarioDesativado() {
-            super(MSG_USUARIO_DESATIVADO);
-        }
-    }
-
-    public static class ErroGerarToken extends RuntimeException {
-        public ErroGerarToken() {
-            super(MSG_ERRO_GERAR_TOKEN);
-        }
-    }
-
-    public static class TokenExpiradoOuInvalido extends RuntimeException {
-        public TokenExpiradoOuInvalido() {
-            super(MSG_TOKEN_EXPIRADO_OU_INVALIDO);
-        }
-    }
-
-    public static class CredenciaisInvalidas extends RuntimeException {
+    public static class CredenciaisInvalidas extends UsuarioException {
         public CredenciaisInvalidas() {
-            super(MSG_CREDENCIAIS_INVALIDAS);
+            super("Credenciais inválidas.");
         }
     }
 
-    public static class SenhaAtualIncorreta extends RuntimeException {
+    public static class UsuarioDesativado extends UsuarioException {
+        public UsuarioDesativado() {
+            super("Usuário desativado.");
+        }
+    }
+
+    public static class ErroGerarToken extends UsuarioException {
+        public ErroGerarToken() {
+            super("Erro ao gerar Token.");
+        }
+    }
+
+    public static class TokenExpiradoOuInvalido extends UsuarioException {
+        public TokenExpiradoOuInvalido() {
+            super("Token expirado ou inválido.");
+        }
+    }
+
+    public static class SenhaAtualIncorreta extends UsuarioException {
         public SenhaAtualIncorreta() {
-            super(MSG_SENHA_ATUAL_INCORRETA);
+            super("A senha atual fornecida está incorreta. Verifique e tente novamente.");
         }
     }
 }

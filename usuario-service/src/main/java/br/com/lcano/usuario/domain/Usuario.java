@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,19 +23,20 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-@Table(name = "usuario")
 @Entity
+@Table(name = "usuario")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString(of = "id")
 public class Usuario implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -46,6 +49,10 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private boolean ativo;
 
+    @ManyToOne
+    @JoinColumn(name = "idtema", referencedColumnName = "id")
+    private Tema tema;
+
     @Column(name = "icone")
     private byte[] icone;
 
@@ -54,14 +61,6 @@ public class Usuario implements UserDetails {
         this.senha = senha;
         this.dataInclusao = dataInclusao;
         this.ativo = true;
-    }
-
-    public Usuario(Long id, String username, String senha, Date dataInclusao, Boolean ativo) {
-        this.id = id;
-        this.username = username;
-        this.senha = senha;
-        this.dataInclusao = dataInclusao;
-        this.ativo = ativo;
     }
 
     @Override
