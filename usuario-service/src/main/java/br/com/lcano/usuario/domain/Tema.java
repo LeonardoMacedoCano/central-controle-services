@@ -78,6 +78,6 @@ public class Tema implements Serializable {
     private boolean isDefault;
 
     @ManyToOne
-    @JoinColumn(name = "idusuario", nullable = false)
+    @JoinColumn(name = "idusuario")
     private Usuario usuario;
 }
