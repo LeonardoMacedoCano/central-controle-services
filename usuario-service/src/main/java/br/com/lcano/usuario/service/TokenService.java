@@ -22,7 +22,7 @@ public class TokenService {
             Algorithm algorithm = Algorithm.HMAC256(PropertiesConfig.getTokenSecret());
             return JWT.create()
                     .withIssuer("usuario-service")
-                    .withSubject(usuario.getUsername())
+                    .withSubject(usuario.getId().toString())
                     .withExpiresAt(getDataExpiracao())
                     .sign(algorithm);
         } catch (Exception e) {
@@ -30,14 +30,21 @@ public class TokenService {
         }
     }
 
-    public String validateToken(String token) {
+    public Long validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(PropertiesConfig.getTokenSecret());
-            return JWT.require(algorithm)
+            String subject = JWT.require(algorithm)
                     .withIssuer("usuario-service")
                     .build()
                     .verify(token)
                     .getSubject();
+
+            try {
+                return Long.valueOf(subject);
+            } catch (NumberFormatException e) {
+                throw new UsuarioException.TokenExpiradoOuInvalido();
+            }
+
         } catch (JWTVerificationException e) {
             throw new UsuarioException.TokenExpiradoOuInvalido();
         }

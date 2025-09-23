@@ -5,7 +5,6 @@ import br.com.lcano.usuario.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -27,11 +26,10 @@ public class TokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            String username = tokenService.validateToken(token);
+            Long userId = tokenService.validateToken(token);
 
-            if (username != null && !username.isEmpty()) {
-                UserDetails usuario = usuarioRepository.findByUsername(username);
-                request.setAttribute("usuario", usuario);
+            if (userId != null) {
+                request.setAttribute("userId", userId);
                 return true;
             }
         }
@@ -39,6 +37,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido");
         return false;
     }
+
 
     private boolean isPathExemptFromAuthentication(String path) {
         return (path.startsWith("/api/auth") && (path.length() == 9 || path.charAt(9) == '/')) ||

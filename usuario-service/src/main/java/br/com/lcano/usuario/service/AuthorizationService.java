@@ -44,7 +44,7 @@ public class AuthorizationService implements UserDetailsService {
 
     public LoginResponseDTO login(LoginRequestDTO data, AuthenticationManager authenticationManager) {
         if (!usuarioJaCadastrado(data.getUsername())) {
-            throw new UsuarioException.UsuarioNaoEncontrado();
+            throw new UsuarioException.CredenciaisInvalidas();
         }
 
         if (!usuarioAtivo(data.getUsername())) {
@@ -74,8 +74,8 @@ public class AuthorizationService implements UserDetailsService {
     }
 
     public LoginResponseDTO validateToken(String token) {
-        String username = tokenService.validateToken(token);
-        Usuario usuario = usuarioRepository.findUsuarioByUsername(username);
+        Long idUser = tokenService.validateToken(token);
+        Usuario usuario = usuarioRepository.findById(idUser).orElseThrow(UsuarioException.UsuarioNaoEncontrado::new);
         return mapToLoginResponseDTO(usuario, token);
     }
 

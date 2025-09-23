@@ -1,5 +1,6 @@
 package br.com.lcano.usuario.security;
 
+import br.com.lcano.usuario.exception.UsuarioException;
 import br.com.lcano.usuario.repository.UsuarioRepository;
 import br.com.lcano.usuario.service.TokenService;
 import jakarta.servlet.FilterChain;
@@ -42,8 +43,8 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         String token = getToken(request);
         if (token != null) {
-            String username = tokenService.validateToken(token);
-            UserDetails usuario = usuarioRepository.findByUsername(username);
+            Long idUser = tokenService.validateToken(token);
+            UserDetails usuario = usuarioRepository.findById(idUser).orElseThrow(UsuarioException.UsuarioNaoEncontrado::new);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
