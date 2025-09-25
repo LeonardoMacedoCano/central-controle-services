@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-movimentacaocategoria" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="movimentacaocategoria"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="movimentacaocategoria">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkmovimentacaocategoria"/>
+            </column>
+            <column name="descricao" type="${varchar_100}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tipo" type="${varchar_20}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="movimentacaocategoria"
+                columnNames="descricao, tipo"
+                constraintName="uk_movimentacaocategoria_descricao_tipo"/>
+    </changeSet>
+
+    <changeSet id="insert-default-movimentacaocategoriadespesa" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="movimentacaocategoria"/>
+        </preConditions>
+
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Moradia"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Transporte"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Restaurante"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Supermercado"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Educação"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Lazer"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Serviços"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Vestuário"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="DESPESA"/>
+            <column name="descricao" value="Outros"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-default-movimentacaocategoriarenda" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="movimentacaocategoria"/>
+        </preConditions>
+
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="RENDA"/>
+            <column name="descricao" value="Salário"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="RENDA"/>
+            <column name="descricao" value="Renda Extra"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="RENDA"/>
+            <column name="descricao" value="Renda Passiva"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

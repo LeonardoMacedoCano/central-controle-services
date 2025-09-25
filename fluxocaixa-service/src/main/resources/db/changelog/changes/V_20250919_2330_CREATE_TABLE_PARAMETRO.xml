@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-parametro" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela parametro já existe">
+            <not>
+                <tableExists tableName="parametro"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="parametro">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkparametro"/>
+            </column>
+            <column name="idusuario" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="idcategoriadespesapadrao" type="${integer}"/>
+            <column name="metalimitedespesamensal" type="${number_10_2}"/>
+            <column name="idcategoriarendapadrao" type="${integer}"/>
+            <column name="idcategoriarendapassiva" type="${integer}"/>
+            <column name="metaaportemensal" type="${number_10_2}"/>
+            <column name="metaaportetotal" type="${number_15_2}"/>
+            <column name="diapadraovencimentocartao" type="${integer}" defaultValue="10">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="parametro"
+                columnNames="idusuario"
+                constraintName="ukparametrousuario"/>
+
+        <addForeignKeyConstraint baseTableName="parametro"
+                                 baseColumnNames="idcategoriadespesapadrao"
+                                 constraintName="fkparametrocategdesp"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="parametro"
+                                 baseColumnNames="idcategoriarendapadrao"
+                                 constraintName="fkfluxocaixacategrenda"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="parametro"
+                                 baseColumnNames="idcategoriarendapassiva"
+                                 constraintName="fkfluxocaixacategrendapas"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
