@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ParametroRepository extends JpaRepository<Parametro, Long> {
+    Parametro findByIdUsuario(Long idUsuario);
 }
