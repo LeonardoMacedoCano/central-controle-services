@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +28,12 @@ public class MovimentacaoCategoriaResource {
     private final MovimentacaoCategoriaService service;
 
     @GetMapping("/search")
-    public ResponseEntity<Page<MovimentacaoCategoriaDTO>> findAllPagedAsDto(Pageable pageable) {
-        return ResponseEntity.ok(service.findAllPagedAsDto(pageable));
+    public ResponseEntity<Page<MovimentacaoCategoriaDTO>> search(
+            @RequestParam(value = "filter", required = false) String filter,
+            Pageable pageable
+    ) {
+        Page<MovimentacaoCategoriaDTO> page = service.findAllAsDto(filter, pageable);
+        return ResponseEntity.ok(page);
     }
 
     @PostMapping

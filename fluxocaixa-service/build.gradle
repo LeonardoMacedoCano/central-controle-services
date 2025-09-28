@@ -43,6 +43,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // RSQL parser
+    implementation 'cz.jirutka.rsql:rsql-parser:2.1.0'
+
     // Devtools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
