@@ -92,4 +92,31 @@
         </insert>
     </changeSet>
 
+    <changeSet id="insert-default-movimentacaocategoriaativo" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="movimentacaocategoria"/>
+        </preConditions>
+
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="ATIVO"/>
+            <column name="descricao" value="Ação Nacional"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="ATIVO"/>
+            <column name="descricao" value="Ação Internacional"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="ATIVO"/>
+            <column name="descricao" value="Fundo Imobiliário"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="ATIVO"/>
+            <column name="descricao" value="ETF"/>
+        </insert>
+        <insert tableName="movimentacaocategoria">
+            <column name="tipo" value="ATIVO"/>
+            <column name="descricao" value="Criptomoeda"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
