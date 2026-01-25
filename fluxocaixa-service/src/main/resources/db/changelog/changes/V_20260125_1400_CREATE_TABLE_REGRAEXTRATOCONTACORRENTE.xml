@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-regraextratocontacorrente" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela regraextratocontacorrente já existe">
+            <not>
+                <tableExists tableName="regraextratocontacorrente"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="regraextratocontacorrente">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkregraextratocontacorrente"/>
+            </column>
+            <column name="idusuario" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tiporegra" type="${varchar_20}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricao" type="${varchar_255}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricaomatch" type="${varchar_255}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricaodestino" type="${varchar_255}"/>
+            <column name="idcategoriadespesadestino" type="${integer}"/>
+            <column name="idcategoriarendadestino" type="${integer}"/>
+            <column name="idcategoriaativodestino" type="${integer}" />
+            <column name="prioridade" type="${integer}" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ativo" type="${char_1}" defaultValue="S">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="regraextratocontacorrente"
+                                 baseColumnNames="idcategoriadespesadestino"
+                                 constraintName="fkregraextratocontacorcatdesp"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="regraextratocontacorrente"
+                                 baseColumnNames="idcategoriarendadestino"
+                                 constraintName="fkregraextratocontacorcatren"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="regraextratocontacorrente"
+                                 baseColumnNames="idcategoriaativodestino"
+                                 constraintName="fkregraextratocontacorcatativo"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
