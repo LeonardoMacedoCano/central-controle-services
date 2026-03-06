@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-lancamento" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela lancamento já existe">
+            <not>
+                <tableExists tableName="lancamento"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="lancamento">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pklancamento"/>
+            </column>
+            <column name="idusuario" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datalancamento" type="${date}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricao" type="${varchar_255}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tipo" type="${varchar_255}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-table-despesa" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela despesa já existe">
+            <not>
+                <tableExists tableName="despesa"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="despesa">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkdespesa"/>
+            </column>
+            <column name="idlancamento" type="${integer}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="idcategoria" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="formapagamento" type="${varchar_255}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datavencimento" type="${date}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valor" type="${number_10_2}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="despesa"
+                                 baseColumnNames="idlancamento"
+                                 constraintName="fkdespesalancamento"
+                                 referencedTableName="lancamento"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="despesa"
+                                 baseColumnNames="idcategoria"
+                                 constraintName="fkdespesacategoria"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="create-table-renda" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela renda já existe">
+            <not>
+                <tableExists tableName="renda"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="renda">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkrenda"/>
+            </column>
+            <column name="idlancamento" type="${integer}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="idcategoria" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valor" type="${number_10_2}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datarecebimento" type="${date}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="renda"
+                                 baseColumnNames="idlancamento"
+                                 constraintName="fkrendalancamento"
+                                 referencedTableName="lancamento"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="renda"
+                                 baseColumnNames="idcategoria"
+                                 constraintName="fkrendacategoria"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="create-table-ativo" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela ativo já existe">
+            <not>
+                <tableExists tableName="ativo"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="ativo">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkativo"/>
+            </column>
+            <column name="idlancamento" type="${integer}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="idcategoria" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operacao" type="${varchar_10}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="valor" type="${number_10_2}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datamovimento" type="${date}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ativo"
+                                 baseColumnNames="idlancamento"
+                                 constraintName="fkativolancamento"
+                                 referencedTableName="lancamento"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="ativo"
+                                 baseColumnNames="idcategoria"
+                                 constraintName="fkativocategoria"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

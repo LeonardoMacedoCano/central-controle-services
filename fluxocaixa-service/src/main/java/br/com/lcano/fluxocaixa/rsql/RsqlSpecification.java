@@ -4,6 +4,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Locale;
 
 public class RsqlSpecification<T> implements Specification<T> {
@@ -36,8 +38,16 @@ public class RsqlSpecification<T> implements Specification<T> {
             case GREATER_THAN_OR_EQUAL -> greaterThanOrEqual(builder, path, value);
             case LESS_THAN_OR_EQUAL -> lessThanOrEqual(builder, path, value);
 
-            case IN -> path.in(criteria.getValues());
-            case NOT_IN -> builder.not(path.in(criteria.getValues()));
+            case IN -> path.in(
+                    criteria.getValues().stream()
+                            .map(v -> convertValue(v, fieldType))
+                            .toList()
+            );
+            case NOT_IN -> builder.not(path.in(
+                    criteria.getValues().stream()
+                            .map(v -> convertValue(v, fieldType))
+                            .toList()
+            ));
 
             case LIKE -> builder.like(
                     builder.lower(path.as(String.class)),
@@ -50,6 +60,20 @@ public class RsqlSpecification<T> implements Specification<T> {
         if (fieldType == Boolean.class || fieldType == boolean.class) {
             return Boolean.valueOf(value);
         }
+
+        if (fieldType == Timestamp.class) {
+            LocalDate date = LocalDate.parse(value);
+            return Timestamp.valueOf(date.atStartOfDay());
+        }
+
+        if (fieldType == Long.class || fieldType == long.class) {
+            return Long.valueOf(value);
+        }
+
+        if (fieldType == Integer.class || fieldType == int.class) {
+            return Integer.valueOf(value);
+        }
+
         return value;
     }
 

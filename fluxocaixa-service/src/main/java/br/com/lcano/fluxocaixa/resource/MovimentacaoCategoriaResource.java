@@ -3,7 +3,6 @@ package br.com.lcano.fluxocaixa.resource;
 import br.com.lcano.fluxocaixa.dto.MovimentacaoCategoriaDTO;
 import br.com.lcano.fluxocaixa.service.MovimentacaoCategoriaService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +23,6 @@ import java.util.Map;
 @RequestMapping("/api/movimentacao-categoria")
 public class MovimentacaoCategoriaResource {
 
-    @Autowired
     private final MovimentacaoCategoriaService service;
 
     @GetMapping("/search")

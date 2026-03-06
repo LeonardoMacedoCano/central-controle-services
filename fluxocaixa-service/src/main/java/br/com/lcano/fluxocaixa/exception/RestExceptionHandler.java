@@ -26,4 +26,19 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleRegraNaoEncontrado(RegraExtratoContaCorrenteException.RegraNaoEncontrado ex) {
         return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+
+    @ExceptionHandler({LancamentoException.LancamentoNaoEncontradoById.class})
+    protected ResponseEntity<Object> handleLancamentoNaoEncontradaById(LancamentoException.LancamentoNaoEncontradoById ex) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler({LancamentoException.LancamentoTipoNaoSuportado.class})
+    protected ResponseEntity<Object> handleLancamentoTipoNaoSuportado(LancamentoException.LancamentoTipoNaoSuportado ex) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler({LancamentoException.ErroIniciarImportacaoExtrato.class})
+    protected ResponseEntity<Object> handleErroIniciarImportacaoExtrato(LancamentoException.ErroIniciarImportacaoExtrato ex) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }

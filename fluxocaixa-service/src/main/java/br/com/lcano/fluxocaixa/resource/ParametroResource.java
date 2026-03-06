@@ -3,7 +3,6 @@ package br.com.lcano.fluxocaixa.resource;
 import br.com.lcano.fluxocaixa.dto.ParametroDTO;
 import br.com.lcano.fluxocaixa.service.ParametroService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +18,6 @@ import java.util.Map;
 @RequestMapping("/api/parametro")
 public class ParametroResource {
 
-    @Autowired
     private final ParametroService service;
 
     @GetMapping
