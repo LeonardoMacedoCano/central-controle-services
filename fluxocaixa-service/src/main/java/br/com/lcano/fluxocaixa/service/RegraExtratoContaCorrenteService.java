@@ -7,7 +7,6 @@ import br.com.lcano.fluxocaixa.repository.RegraExtratoContaCorrenteRepository;
 import br.com.lcano.fluxocaixa.rsql.RsqlSpecUtil;
 import br.com.lcano.fluxocaixa.utils.UsuarioUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class RegraExtratoContaCorrenteService {
-    @Autowired
     private final RegraExtratoContaCorrenteRepository repository;
 
     public RegraExtratoContaCorrenteDTO findDtoById(Long id) {

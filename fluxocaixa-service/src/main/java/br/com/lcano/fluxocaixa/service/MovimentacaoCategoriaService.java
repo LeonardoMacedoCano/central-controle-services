@@ -5,7 +5,6 @@ import br.com.lcano.fluxocaixa.dto.MovimentacaoCategoriaDTO;
 import br.com.lcano.fluxocaixa.repository.MovimentacaoCategoriaRepository;
 import br.com.lcano.fluxocaixa.rsql.RsqlSpecUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class MovimentacaoCategoriaService {
 
-    @Autowired
     private final MovimentacaoCategoriaRepository repository;
 
     public Page<MovimentacaoCategoria> findAll(Specification<MovimentacaoCategoria> spec, Pageable pageable) {

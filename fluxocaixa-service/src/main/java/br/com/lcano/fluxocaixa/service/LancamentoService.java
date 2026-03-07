@@ -47,7 +47,7 @@ public class LancamentoService {
     public LancamentoDTO findByIdAsDto(Long id) {
         return toDto(repository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Lançamento não encontrado: " + id)));
+                        new LancamentoException.LancamentoNaoEncontradoById(id)));
     }
 
     @Transactional

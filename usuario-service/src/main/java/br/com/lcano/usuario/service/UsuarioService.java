@@ -7,7 +7,7 @@ import br.com.lcano.usuario.repository.UsuarioRepository;
 import br.com.lcano.usuario.util.UsuarioUtil;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +17,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioUtil usuarioUtil;
     private final TemaService temaService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void updateAsDto(UsuarioFormDTO usuarioFormDTO) throws Exception {
@@ -47,8 +48,6 @@ public class UsuarioService {
     }
 
     private void validateSenhas(Usuario usuario, String currentPassword, String newPassword) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
         if (!passwordEncoder.matches(currentPassword, usuario.getSenha())) {
             throw new UsuarioException.CredenciaisInvalidas();
         }
@@ -59,7 +58,6 @@ public class UsuarioService {
     }
 
     private void updateSenha(Usuario usuario, String newPassword) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         usuario.setSenha(passwordEncoder.encode(newPassword));
     }
 
