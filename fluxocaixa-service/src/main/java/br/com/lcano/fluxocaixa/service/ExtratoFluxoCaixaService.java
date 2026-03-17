@@ -65,7 +65,7 @@ public class ExtratoFluxoCaixaService {
         return new ImportacaoExtratoDTO().fromEntity(importacao);
     }
 
-    public ImportacaoExtratoDTO consultarStatus(Long id) {
+    public ImportacaoExtratoDTO findStatusById(Long id) {
         ImportacaoExtrato importacao = importacaoExtratoRepository.findById(id)
                 .orElseThrow(() -> new ExtratoException.ImportacaoNaoEncontrada(id));
         return new ImportacaoExtratoDTO().fromEntity(importacao);

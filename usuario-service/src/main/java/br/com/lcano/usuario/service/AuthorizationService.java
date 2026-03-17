@@ -33,21 +33,21 @@ public class AuthorizationService implements UserDetailsService {
         return usuarioRepository.findUsuarioByUsername(username);
     }
 
-    public boolean usuarioJaCadastrado(String username) {
+    public boolean existsByUsername(String username) {
         return usuarioRepository.findUsuarioByUsername(username) != null;
     }
 
-    public boolean usuarioAtivo(String username) {
+    public boolean isAtivo(String username) {
         Usuario usuario = usuarioRepository.findUsuarioByUsername(username);
         return usuario != null && usuario.isEnabled();
     }
 
     public LoginResponseDTO login(LoginRequestDTO data, AuthenticationManager authenticationManager) {
-        if (!usuarioJaCadastrado(data.getUsername())) {
+        if (!existsByUsername(data.getUsername())) {
             throw new UsuarioException.CredenciaisInvalidas();
         }
 
-        if (!usuarioAtivo(data.getUsername())) {
+        if (!isAtivo(data.getUsername())) {
             throw new UsuarioException.UsuarioDesativado();
         }
 
@@ -55,12 +55,12 @@ public class AuthorizationService implements UserDetailsService {
         var authentication = authenticationManager.authenticate(credentials);
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        String token = tokenService.gerarToken(usuario);
+        String token = tokenService.generateToken(usuario);
         return mapToLoginResponseDTO(usuario, token);
     }
 
     public void register(LoginRequestDTO data) {
-        if (usuarioJaCadastrado(data.getUsername())) {
+        if (existsByUsername(data.getUsername())) {
             throw new UsuarioException.UsuarioJaCadastrado();
         }
 

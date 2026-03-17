@@ -18,7 +18,7 @@ public class RegraExtratoContaCorrenteResource {
 
     @GetMapping("/{id}")
     public RegraExtratoContaCorrenteDTO findById(@PathVariable Long id) {
-        return service.findDtoById(id);
+        return service.findByIdAsDto(id);
     }
 
     @GetMapping("/search")

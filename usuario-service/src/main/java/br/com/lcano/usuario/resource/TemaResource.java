@@ -29,12 +29,12 @@ public class TemaResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<TemaDTO> findByIdAsDto(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findByIdAsDtoOrThrow(id));
+        return ResponseEntity.ok(service.findByIdAsDto(id));
     }
 
     @GetMapping("/default")
     public ResponseEntity<TemaDTO> getDefaultTheme() {
-        return ResponseEntity.ok(service.findDefaultThemeAsDtoOrThrow());
+        return ResponseEntity.ok(service.findDefaultAsDto());
     }
 
     @PostMapping

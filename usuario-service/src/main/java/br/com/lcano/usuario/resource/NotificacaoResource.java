@@ -21,10 +21,10 @@ public class NotificacaoResource {
     private final UsuarioUtil usuarioUtil;
 
     @PostMapping("/interna")
-    public ResponseEntity<Void> receberInterna(
+    public ResponseEntity<Void> receiveInterna(
             @RequestHeader("X-Service-Secret") String secret,
             @RequestBody NotificacaoInternaDTO dto) {
-        service.receberInterna(secret, dto);
+        service.receiveInterna(secret, dto);
         return ResponseEntity.ok().build();
     }
 
@@ -43,9 +43,9 @@ public class NotificacaoResource {
     }
 
     @PatchMapping("/{id}/lida")
-    public ResponseEntity<Void> marcarComoLida(@PathVariable Long id) {
+    public ResponseEntity<Void> markAsLida(@PathVariable Long id) {
         Long idUsuario = usuarioUtil.getUsuarioAutenticado().getId();
-        service.marcarComoLida(id, idUsuario);
+        service.markAsLida(id, idUsuario);
         return ResponseEntity.ok().build();
     }
 }

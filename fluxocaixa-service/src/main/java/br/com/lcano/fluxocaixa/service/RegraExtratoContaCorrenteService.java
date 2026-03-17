@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class RegraExtratoContaCorrenteService {
     private final RegraExtratoContaCorrenteRepository repository;
 
-    public RegraExtratoContaCorrenteDTO findDtoById(Long id) {
+    public RegraExtratoContaCorrenteDTO findByIdAsDto(Long id) {
         return repository.findById(id)
                 .map(entity -> new RegraExtratoContaCorrenteDTO().fromEntity(entity))
                 .orElseThrow(() -> new RegraExtratoContaCorrenteException.RegraNaoEncontrado(id));

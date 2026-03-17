@@ -24,7 +24,7 @@ public class TokenService {
     @Value("${api.security.token.expiration-hours}")
     private int tokenExpirationHours;
 
-    public String gerarToken(Usuario usuario) {
+    public String generateToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(tokenSecret);
             return JWT.create()

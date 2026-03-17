@@ -24,13 +24,13 @@ public class TemaService {
                 .toList();
     }
 
-    public TemaDTO findDefaultThemeAsDtoOrThrow() {
+    public TemaDTO findDefaultAsDto() {
         return repository.findByIsDefault(Boolean.TRUE)
                 .map(entity -> new TemaDTO().fromEntity(entity))
                 .orElseThrow(TemaException.TemaPadraoNaoEncontrado::new);
     }
 
-    public TemaDTO findByIdAsDtoOrThrow(Long id) {
+    public TemaDTO findByIdAsDto(Long id) {
         return repository.findById(id)
                 .map(entity -> new TemaDTO().fromEntity(entity))
                 .orElseThrow(() -> new TemaException.TemaNaoEncontrado(id));

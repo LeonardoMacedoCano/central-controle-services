@@ -35,7 +35,7 @@ public class ExtratoFluxoCaixaResource {
     }
 
     @GetMapping("/{id}/status")
-    public ResponseEntity<ImportacaoExtratoDTO> consultarStatus(@PathVariable Long id) {
-        return ResponseEntity.ok(service.consultarStatus(id));
+    public ResponseEntity<ImportacaoExtratoDTO> findStatusById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findStatusById(id));
     }
 }

@@ -22,7 +22,7 @@ public class NotificacaoService {
     @Value("${service.secret}")
     private String serviceSecret;
 
-    public void receberInterna(String secret, NotificacaoInternaDTO dto) {
+    public void receiveInterna(String secret, NotificacaoInternaDTO dto) {
         if (!serviceSecret.equals(secret)) {
             throw new NotificacaoException.SecretInvalido();
         }
@@ -47,7 +47,7 @@ public class NotificacaoService {
         return repository.countByIdUsuarioAndLida(idUsuario, false);
     }
 
-    public void marcarComoLida(Long id, Long idUsuario) {
+    public void markAsLida(Long id, Long idUsuario) {
         Notificacao notificacao = repository.findById(id)
                 .orElseThrow(() -> new NotificacaoException.NotificacaoNaoEncontrada(id));
         if (!notificacao.getIdUsuario().equals(idUsuario)) {
