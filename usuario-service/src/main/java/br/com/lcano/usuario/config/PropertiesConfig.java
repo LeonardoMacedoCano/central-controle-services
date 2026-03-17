@@ -27,7 +27,7 @@ public class PropertiesConfig {
     }
 
     private void registerAdminUserIfNecessary() {
-        if (!authorizationService.usuarioJaCadastrado(adminUsername)) {
+        if (!authorizationService.existsByUsername(adminUsername)) {
             try {
                 authorizationService.register(new LoginRequestDTO(adminUsername, adminPassword));
             } catch (Exception e) {
