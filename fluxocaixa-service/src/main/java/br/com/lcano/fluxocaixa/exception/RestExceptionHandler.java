@@ -8,6 +8,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Map;
 
+
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -40,5 +41,25 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({LancamentoException.ErroIniciarImportacaoExtrato.class})
     protected ResponseEntity<Object> handleErroIniciarImportacaoExtrato(LancamentoException.ErroIniciarImportacaoExtrato ex) {
         return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ExtratoException.ParametroNaoConfigurado.class)
+    protected ResponseEntity<Object> handleParametroNaoConfigurado(ExtratoException.ParametroNaoConfigurado ex) {
+        return buildResponseEntity(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(ExtratoException.ImportacaoNaoEncontrada.class)
+    protected ResponseEntity<Object> handleImportacaoNaoEncontrada(ExtratoException.ImportacaoNaoEncontrada ex) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(ExtratoException.ErroLeituraArquivo.class)
+    protected ResponseEntity<Object> handleErroLeituraArquivo(ExtratoException.ErroLeituraArquivo ex) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ExtratoException.ArquivoJaImportado.class)
+    protected ResponseEntity<Object> handleArquivoJaImportado(ExtratoException.ArquivoJaImportado ex) {
+        return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

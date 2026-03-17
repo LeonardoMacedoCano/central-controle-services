@@ -5,13 +5,11 @@ import br.com.lcano.fluxocaixa.dto.ParametroDTO;
 import br.com.lcano.fluxocaixa.repository.ParametroRepository;
 import br.com.lcano.fluxocaixa.utils.UsuarioUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Service
 public class ParametroService {
-    @Autowired
     private final ParametroRepository repository;
 
     public Parametro findByUsuario() {

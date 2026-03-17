@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-notificacao" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="notificacao"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="notificacao">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pknotificacao"/>
+            </column>
+            <column name="idusuario" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="titulo" type="${varchar_100}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mensagem" type="${varchar_500}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tipo" type="${varchar_20}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lida" type="${char_1}" defaultValue="N">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datacriacao" type="${timestamp}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

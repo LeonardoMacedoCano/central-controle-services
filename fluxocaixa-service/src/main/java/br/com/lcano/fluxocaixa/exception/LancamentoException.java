@@ -21,5 +21,10 @@ public class LancamentoException extends RuntimeException {
         public ErroIniciarImportacaoExtrato() {
             super("Não foi possível iniciar a importação do extrato. Tente novamente mais tarde.");
         }
+
+        public ErroIniciarImportacaoExtrato(Exception cause) {
+            super("Não foi possível iniciar a importação do extrato. Tente novamente mais tarde.");
+            initCause(cause);
+        }
     }
 }

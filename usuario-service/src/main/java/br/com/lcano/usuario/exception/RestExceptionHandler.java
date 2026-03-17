@@ -64,4 +64,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(NotificacaoException.NotificacaoNaoEncontrada.class)
+    protected ResponseEntity<Object> handleNotificacaoNaoEncontrada(NotificacaoException.NotificacaoNaoEncontrada ex) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(NotificacaoException.SecretInvalido.class)
+    protected ResponseEntity<Object> handleSecretInvalido(NotificacaoException.SecretInvalido ex) {
+        return buildResponseEntity(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
 }

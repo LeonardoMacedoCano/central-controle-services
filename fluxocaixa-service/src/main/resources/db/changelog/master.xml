@@ -33,6 +33,7 @@
     <property name="varchar_500" value="CHARACTER VARYING(500)" dbms="postgresql"/>
 
     <!-- Text types -->
+    <property name="text" value="TEXT" dbms="postgresql"/>
     <property name="binary" value="BYTEA" dbms="postgresql"/>
 
     <includeAll path="changes" relativeToChangelogFile="true"/>

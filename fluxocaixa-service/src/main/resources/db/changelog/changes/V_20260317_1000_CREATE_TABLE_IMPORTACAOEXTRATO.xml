@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="create-table-importacaoextrato" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="importacaoextrato"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="importacaoextrato">
+            <column name="id" type="${integer}" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pkimportacaoextrato"/>
+            </column>
+            <column name="idusuario" type="${integer}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tipo" type="${varchar_50}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="${varchar_20}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mensagemerro" type="${text}"/>
+            <column name="datacriacao" type="${timestamp}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datainicio" type="${timestamp}"/>
+            <column name="dataconclusao" type="${timestamp}"/>
+            <column name="totallinhas" type="${integer}"/>
+            <column name="linhasprocessadas" type="${integer}"/>
+            <column name="linhasignoradas" type="${integer}"/>
+            <column name="linhaserro" type="${integer}"/>
+            <column name="hasharquivo" type="${varchar_64}"/>
+            <column name="nomearquivo" type="${varchar_255}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

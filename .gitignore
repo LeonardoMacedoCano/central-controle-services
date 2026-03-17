@@ -29,3 +29,7 @@ Thumbs.db
 .env
 .env.*
 
+# Claude Code
+.omc/
+CLAUDE.md
+

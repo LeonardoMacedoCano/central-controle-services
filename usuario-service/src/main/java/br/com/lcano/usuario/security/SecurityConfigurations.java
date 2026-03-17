@@ -33,6 +33,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/validateToken").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tema/default").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/notificacao/interna").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
