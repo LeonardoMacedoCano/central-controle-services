@@ -36,16 +36,29 @@ public class NotificacaoResource {
         return ResponseEntity.ok(service.findByUsuario(idUsuario, apenasNaoLidas, pageable));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<NotificacaoDTO> findByIdAndMarkAsLida(@PathVariable Long id) {
+        Long idUsuario = usuarioUtil.getUsuarioAutenticado().getId();
+        return ResponseEntity.ok(service.findByIdAndMarkAsLida(id, idUsuario));
+    }
+
     @GetMapping("/nao-lidas/count")
     public ResponseEntity<Map<String, Long>> countNaoLidas() {
         Long idUsuario = usuarioUtil.getUsuarioAutenticado().getId();
         return ResponseEntity.ok(Map.of("total", service.countNaoLidas(idUsuario)));
     }
 
-    @PatchMapping("/{id}/lida")
-    public ResponseEntity<Void> markAsLida(@PathVariable Long id) {
+    @PatchMapping("/{id}/lida/{isUnread}")
+    public ResponseEntity<Void> markAsLida(@PathVariable Long id, @PathVariable Boolean isUnread) {
         Long idUsuario = usuarioUtil.getUsuarioAutenticado().getId();
-        service.markAsLida(id, idUsuario);
+        service.markAsLida(id, idUsuario,isUnread);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/todas/lida")
+    public ResponseEntity<Void> markTodasAsLida() {
+        Long idUsuario = usuarioUtil.getUsuarioAutenticado().getId();
+        service.markTodasAsLida(idUsuario);
         return ResponseEntity.ok().build();
     }
 }

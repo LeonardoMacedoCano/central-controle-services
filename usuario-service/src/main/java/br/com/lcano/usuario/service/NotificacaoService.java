@@ -36,6 +36,19 @@ public class NotificacaoService {
         repository.save(notificacao);
     }
 
+    public NotificacaoDTO findByIdAndMarkAsLida(Long id, Long idUsuario) {
+        Notificacao notificacao = repository.findById(id)
+                .orElseThrow(() -> new NotificacaoException.NotificacaoNaoEncontrada(id));
+        if (!notificacao.getIdUsuario().equals(idUsuario)) {
+            throw new NotificacaoException.NotificacaoNaoEncontrada(id);
+        }
+
+        notificacao.setLida(true);
+        repository.save(notificacao);
+
+        return new NotificacaoDTO().fromEntity(notificacao);
+    }
+
     public Page<NotificacaoDTO> findByUsuario(Long idUsuario, boolean apenasNaoLidas, Pageable pageable) {
         Page<Notificacao> page = apenasNaoLidas
                 ? repository.findByIdUsuarioAndLidaOrderByDataCriacaoDesc(idUsuario, false, pageable)
@@ -47,13 +60,19 @@ public class NotificacaoService {
         return repository.countByIdUsuarioAndLida(idUsuario, false);
     }
 
-    public void markAsLida(Long id, Long idUsuario) {
+    public void markAsLida(Long id, Long idUsuario, boolean lida) {
         Notificacao notificacao = repository.findById(id)
                 .orElseThrow(() -> new NotificacaoException.NotificacaoNaoEncontrada(id));
         if (!notificacao.getIdUsuario().equals(idUsuario)) {
             throw new NotificacaoException.NotificacaoNaoEncontrada(id);
         }
-        notificacao.setLida(true);
+        notificacao.setLida(lida);
         repository.save(notificacao);
+    }
+
+    public void markTodasAsLida(Long idUsuario) {
+        var notificacoes = repository.findByIdUsuarioAndLida(idUsuario, false);
+        notificacoes.forEach(n -> n.setLida(true));
+        repository.saveAll(notificacoes);
     }
 }
