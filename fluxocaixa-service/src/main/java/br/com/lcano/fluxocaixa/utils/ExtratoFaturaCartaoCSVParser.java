@@ -8,18 +8,16 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ExtratoFaturaCartaoCSVParser {
 
-    private static final String DATE_FORMAT = "dd/MM/yyyy";
+    private static final String[] DATE_FORMATS = {"dd/MM/yyyy", "yyyy-MM-dd"};
 
     public static List<ExtratoFaturaCartaoDTO> parse(byte[] conteudo) {
         List<ExtratoFaturaCartaoDTO> itens = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new ByteArrayInputStream(conteudo), StandardCharsets.UTF_8))) {
@@ -34,18 +32,19 @@ public class ExtratoFaturaCartaoCSVParser {
                 line = line.trim();
                 if (line.isEmpty()) continue;
 
-                String[] cols = line.split(";");
+                String[] cols = line.split(",");
                 if (cols.length < 3) continue;
 
                 try {
-                    java.util.Date dataLancamento = sdf.parse(cols[0].trim());
+                    java.util.Date dataLancamento = parseData(cols[0].trim());
+                    if (dataLancamento == null) continue;
                     String descricao = cols[1].trim();
                     BigDecimal valor = new BigDecimal(cols[2].trim().replace(",", "."));
                     String categoria = cols.length > 3 ? cols[3].trim() : null;
                     if (categoria != null && categoria.isEmpty()) categoria = null;
 
                     itens.add(new ExtratoFaturaCartaoDTO(dataLancamento, descricao, valor, categoria));
-                } catch (ParseException | NumberFormatException e) {
+                } catch (NumberFormatException ignored) {
                 }
             }
         } catch (Exception e) {
@@ -53,5 +52,17 @@ public class ExtratoFaturaCartaoCSVParser {
         }
 
         return itens;
+    }
+
+    private static java.util.Date parseData(String valor) {
+        for (String formato : DATE_FORMATS) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(formato);
+                sdf.setLenient(false);
+                return sdf.parse(valor);
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
     }
 }

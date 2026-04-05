@@ -12,7 +12,7 @@ import br.com.lcano.fluxocaixa.repository.ParametroRepository;
 import br.com.lcano.fluxocaixa.repository.RegraExtratoContaCorrenteRepository;
 import br.com.lcano.fluxocaixa.utils.ExtratoContaCorrenteCSVParser;
 import br.com.lcano.fluxocaixa.utils.ExtratoFaturaCartaoCSVParser;
-import br.com.lcano.fluxocaixa.utils.ExtratoMovimentacaoB3CSVParser;
+import br.com.lcano.fluxocaixa.utils.ExtratoMovimentacaoB3XLSXParser;
 import br.com.lcano.fluxocaixa.utils.NotificacaoClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +89,7 @@ public class ExtratoImportacaoAsyncService {
         iniciarProcessamento(importacao);
 
         try {
-            List<ExtratoMovimentacaoB3DTO> itens = ExtratoMovimentacaoB3CSVParser.parse(conteudo);
+            List<ExtratoMovimentacaoB3DTO> itens = ExtratoMovimentacaoB3XLSXParser.parse(conteudo);
             importacao.setTotalLinhas(itens.size());
             importacaoExtratoRepository.save(importacao);
 

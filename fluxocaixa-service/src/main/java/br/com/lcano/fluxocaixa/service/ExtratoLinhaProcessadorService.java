@@ -33,10 +33,6 @@ public class ExtratoLinhaProcessadorService {
         String descricao = item.getDescricao();
         BigDecimal valor = item.getValor();
 
-        if (descricao != null && descricao.toLowerCase().contains("transferência")) {
-            return null;
-        }
-
         for (RegraExtratoContaCorrente regra : regras) {
             if (regra.getDescricaoMatch() == null) continue;
             if (!descricao.toLowerCase().contains(regra.getDescricaoMatch().toLowerCase())) continue;
@@ -99,7 +95,7 @@ public class ExtratoLinhaProcessadorService {
     }
 
     @Transactional
-    public Long processarFaturaCartao(ExtratoFaturaCartaoDTO item,
+    public void processarFaturaCartao(ExtratoFaturaCartaoDTO item,
                                       Long idUsuario,
                                       Date dataVencimento,
                                       Parametro parametro) {
@@ -112,28 +108,29 @@ public class ExtratoLinhaProcessadorService {
         }
 
         Date vencimento = dataVencimento != null ? dataVencimento : item.getDataLancamento();
-        return salvarDespesa(idUsuario, item.getDataLancamento(), item.getDescricao(),
+        salvarDespesa(idUsuario, item.getDataLancamento(), item.getDescricao(),
                 item.getValor(), vencimento, categoria, DespesaFormaPagamento.CARTAO_CREDITO);
     }
 
     @Transactional
-    public Long processarMovimentacaoB3(ExtratoMovimentacaoB3DTO item,
-                                         Long idUsuario,
-                                         Parametro parametro) {
+    public void processarMovimentacaoB3(ExtratoMovimentacaoB3DTO item,
+                                        Long idUsuario,
+                                        Parametro parametro) {
         String tipoMov = item.getTipoMovimentacao() != null ? item.getTipoMovimentacao().toLowerCase() : "";
         boolean isRendaPassiva = tipoMov.contains("dividendo") || tipoMov.contains("juros sobre capital");
 
         if (isRendaPassiva) {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getRendaPassivaCategoria() : null, "renda passiva");
-            return salvarRenda(idUsuario, item.getDataMovimentacao(), item.getProduto(),
+            salvarRenda(idUsuario, item.getDataMovimentacao(), item.getProduto(),
                     item.getPrecoTotal(), item.getDataMovimentacao(), cat);
+            return;
         }
 
         String ticker = extrairTicker(item.getProduto());
         MovimentacaoCategoria cat = encontrarOuCriarCategoria(ticker, TipoCategoria.ATIVO);
         TipoOperacaoExtratoMovimentacaoB3 operacao = resolverOperacaoB3(item.getTipoOperacao());
-        return salvarAtivo(idUsuario, item.getDataMovimentacao(), item.getProduto(),
+        salvarAtivo(idUsuario, item.getDataMovimentacao(), item.getProduto(),
                 item.getPrecoTotal(), item.getDataMovimentacao(), cat, operacao);
     }
 

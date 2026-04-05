@@ -46,6 +46,9 @@ dependencies {
     // RSQL parser
     implementation 'cz.jirutka.rsql:rsql-parser:2.1.0'
 
+    // XLSX parser
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
     // Devtools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
