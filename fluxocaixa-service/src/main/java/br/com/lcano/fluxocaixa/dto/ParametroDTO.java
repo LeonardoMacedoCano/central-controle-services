@@ -12,6 +12,7 @@ public class ParametroDTO {
     private BigDecimal metaLimiteDespesaMensal;
     private MovimentacaoCategoriaDTO rendaCategoriaPadrao;
     private MovimentacaoCategoriaDTO rendaPassivaCategoria;
+    private MovimentacaoCategoriaDTO categoriaPadraoMovimentacaoB3;
     private BigDecimal metaAporteMensal;
     private BigDecimal metaAporteTotal;
     private Long diaPadraoVencimentoCartao;
@@ -43,6 +44,12 @@ public class ParametroDTO {
             );
         }
 
+        if (entity.getCategoriaPadraoMovimentacaoB3() != null) {
+            this.categoriaPadraoMovimentacaoB3 = new MovimentacaoCategoriaDTO().fromEntity(
+                    entity.getCategoriaPadraoMovimentacaoB3()
+            );
+        }
+
         return this;
     }
 
@@ -65,6 +72,10 @@ public class ParametroDTO {
 
         if (this.rendaPassivaCategoria != null) {
             entity.setRendaPassivaCategoria(this.rendaPassivaCategoria.toEntity());
+        }
+
+        if (this.categoriaPadraoMovimentacaoB3 != null) {
+            entity.setCategoriaPadraoMovimentacaoB3(this.categoriaPadraoMovimentacaoB3.toEntity());
         }
 
         return entity;

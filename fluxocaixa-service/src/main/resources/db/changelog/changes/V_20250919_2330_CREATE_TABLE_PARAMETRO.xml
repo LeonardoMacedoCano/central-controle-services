@@ -23,6 +23,7 @@
             <column name="metalimitedespesamensal" type="${number_10_2}"/>
             <column name="idcategoriarendapadrao" type="${integer}"/>
             <column name="idcategoriarendapassiva" type="${integer}"/>
+            <column name="idcategoriapadraomovb3" type="${integer}"/>
             <column name="metaaportemensal" type="${number_10_2}"/>
             <column name="metaaportetotal" type="${number_15_2}"/>
             <column name="diapadraovencimentocartao" type="${integer}" defaultValue="10">
@@ -50,6 +51,12 @@
         <addForeignKeyConstraint baseTableName="parametro"
                                  baseColumnNames="idcategoriarendapassiva"
                                  constraintName="fkfluxocaixacategrendapas"
+                                 referencedTableName="movimentacaocategoria"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="parametro"
+                                 baseColumnNames="idcategoriapadraomovb3"
+                                 constraintName="fkfluxocaixacatemovb3"
                                  referencedTableName="movimentacaocategoria"
                                  referencedColumnNames="id"/>
     </changeSet>

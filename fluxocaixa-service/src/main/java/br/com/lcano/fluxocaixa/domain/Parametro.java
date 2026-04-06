@@ -41,6 +41,10 @@ public class Parametro {
     @JoinColumn(name = "idcategoriarendapassiva")
     private MovimentacaoCategoria rendaPassivaCategoria;
 
+    @ManyToOne
+    @JoinColumn(name = "idcategoriapadraomovb3")
+    private MovimentacaoCategoria categoriaPadraoMovimentacaoB3;
+
     @Column(name = "metaaportemensal")
     private BigDecimal metaAporteMensal;
 

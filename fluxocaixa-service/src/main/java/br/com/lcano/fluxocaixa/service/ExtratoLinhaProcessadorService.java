@@ -69,9 +69,7 @@ public class ExtratoLinhaProcessadorService {
                 case CLASSIFICAR_ATIVO -> {
                     MovimentacaoCategoria cat = resolverCategoria(
                             regra.getAtivoCategoriaDestino(), null, "ativo");
-                    TipoOperacaoExtratoMovimentacaoB3 operacao = valor.compareTo(BigDecimal.ZERO) < 0
-                            ? TipoOperacaoExtratoMovimentacaoB3.DEBITO
-                            : TipoOperacaoExtratoMovimentacaoB3.CREDITO;
+                    TipoOperacaoExtratoMovimentacaoB3 operacao = TipoOperacaoExtratoMovimentacaoB3.CREDITO;
                     String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
                     return salvarAtivo(idUsuario, item.getDataLancamento(), desc, valor.abs(),
                             item.getDataLancamento(), cat, operacao);
@@ -101,7 +99,7 @@ public class ExtratoLinhaProcessadorService {
                                       Parametro parametro) {
         MovimentacaoCategoria categoria;
         if (item.getCategoria() != null) {
-            categoria = encontrarOuCriarCategoria(capitalize(item.getCategoria()), TipoCategoria.DESPESA);
+            categoria = findOrCreateCategoriaDespesa(capitalize(item.getCategoria()));
         } else {
             categoria = resolverCategoria(null,
                     parametro != null ? parametro.getDespesaCategoriaPadrao() : null, "despesa");
@@ -127,8 +125,8 @@ public class ExtratoLinhaProcessadorService {
             return;
         }
 
-        String ticker = extrairTicker(item.getProduto());
-        MovimentacaoCategoria cat = encontrarOuCriarCategoria(ticker, TipoCategoria.ATIVO);
+        MovimentacaoCategoria cat = resolverCategoria(
+                null, parametro != null ? parametro.getCategoriaPadraoMovimentacaoB3() : null, "movimentação B3");
         TipoOperacaoExtratoMovimentacaoB3 operacao = resolverOperacaoB3(item.getTipoOperacao());
         salvarAtivo(idUsuario, item.getDataMovimentacao(), item.getProduto(),
                 item.getPrecoTotal(), item.getDataMovimentacao(), cat, operacao);
@@ -261,20 +259,15 @@ public class ExtratoLinhaProcessadorService {
                 "Nenhuma categoria de " + tipo + " configurada. Configure os parâmetros do usuário.");
     }
 
-    private MovimentacaoCategoria encontrarOuCriarCategoria(String descricao, TipoCategoria tipo) {
+    private MovimentacaoCategoria findOrCreateCategoriaDespesa(String descricao) {
         return movimentacaoCategoriaRepository
-                .findByDescricaoIgnoreCaseAndTipo(descricao, tipo)
+                .findByDescricaoIgnoreCaseAndTipo(descricao, TipoCategoria.DESPESA)
                 .orElseGet(() -> {
                     MovimentacaoCategoria nova = new MovimentacaoCategoria();
                     nova.setDescricao(descricao);
-                    nova.setTipo(tipo);
+                    nova.setTipo(TipoCategoria.DESPESA);
                     return movimentacaoCategoriaRepository.save(nova);
                 });
-    }
-
-    private String extrairTicker(String produto) {
-        if (produto == null) return "OUTROS";
-        return produto.trim().split("[-\\s]+")[0].toUpperCase();
     }
 
     private TipoOperacaoExtratoMovimentacaoB3 resolverOperacaoB3(String tipoOperacao) {
