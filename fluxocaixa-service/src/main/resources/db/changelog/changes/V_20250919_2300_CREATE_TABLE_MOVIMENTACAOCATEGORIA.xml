@@ -28,12 +28,6 @@
                 tableName="movimentacaocategoria"
                 columnNames="descricao, tipo"
                 constraintName="uk_movimentacaocategoria_descricao_tipo"/>
-    </changeSet>
-
-    <changeSet id="insert-default-movimentacaocategoriadespesa" author="lcano">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="movimentacaocategoria"/>
-        </preConditions>
 
         <insert tableName="movimentacaocategoria">
             <column name="tipo" value="DESPESA"/>
@@ -71,12 +65,6 @@
             <column name="tipo" value="DESPESA"/>
             <column name="descricao" value="Outros"/>
         </insert>
-    </changeSet>
-
-    <changeSet id="insert-default-movimentacaocategoriarenda" author="lcano">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="movimentacaocategoria"/>
-        </preConditions>
 
         <insert tableName="movimentacaocategoria">
             <column name="tipo" value="RENDA"/>
@@ -90,12 +78,6 @@
             <column name="tipo" value="RENDA"/>
             <column name="descricao" value="Renda Passiva"/>
         </insert>
-    </changeSet>
-
-    <changeSet id="insert-default-movimentacaocategoriaativo" author="lcano">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="movimentacaocategoria"/>
-        </preConditions>
 
         <insert tableName="movimentacaocategoria">
             <column name="tipo" value="ATIVO"/>
