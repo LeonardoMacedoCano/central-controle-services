@@ -28,6 +28,7 @@
             <column name="tipo" type="${varchar_255}">
                 <constraints nullable="false"/>
             </column>
+            <column name="descricaoorigem" type="${varchar_255}"/>
         </createTable>
     </changeSet>
 

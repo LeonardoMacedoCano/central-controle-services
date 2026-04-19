@@ -12,8 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class ExtratoLinhaProcessadorService {
                                        Long idUsuario,
                                        List<RegraExtratoContaCorrente> regras,
                                        Parametro parametro) {
+        String descricaoOrigem = item.getDescricao();
         String descricao = item.getDescricao();
         BigDecimal valor = item.getValor();
 
@@ -51,8 +55,8 @@ public class ExtratoLinhaProcessadorService {
                                 parametro != null ? parametro.getDespesaCategoriaPadrao() : null,
                                 "despesa");
                         String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
-                        return salvarDespesa(idUsuario, item.getDataLancamento(), desc, valor.abs(),
-                                item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
+                        return salvarDespesa(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
+                                valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
                     }
                 }
                 case CLASSIFICAR_RENDA -> {
@@ -62,8 +66,8 @@ public class ExtratoLinhaProcessadorService {
                                 parametro != null ? parametro.getRendaCategoriaPadrao() : null,
                                 "renda");
                         String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
-                        return salvarRenda(idUsuario, item.getDataLancamento(), desc, valor,
-                                item.getDataLancamento(), cat);
+                        return salvarRenda(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
+                                valor, item.getDataLancamento(), cat);
                     }
                 }
                 case CLASSIFICAR_ATIVO -> {
@@ -71,8 +75,8 @@ public class ExtratoLinhaProcessadorService {
                             regra.getAtivoCategoriaDestino(), null, "ativo");
                     TipoOperacaoExtratoMovimentacaoB3 operacao = TipoOperacaoExtratoMovimentacaoB3.CREDITO;
                     String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
-                    return salvarAtivo(idUsuario, item.getDataLancamento(), desc, valor.abs(),
-                            item.getDataLancamento(), cat, operacao);
+                    return salvarAtivo(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
+                            valor.abs(), item.getDataLancamento(), cat, operacao);
                 }
             }
         }
@@ -80,13 +84,13 @@ public class ExtratoLinhaProcessadorService {
         if (valor.compareTo(BigDecimal.ZERO) < 0) {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getDespesaCategoriaPadrao() : null, "despesa");
-            return salvarDespesa(idUsuario, item.getDataLancamento(), descricao, valor.abs(),
-                    item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
+            return salvarDespesa(idUsuario, item.getDataLancamento(), descricao, descricaoOrigem,
+                    valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
         } else if (valor.compareTo(BigDecimal.ZERO) > 0) {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getRendaCategoriaPadrao() : null, "renda");
-            return salvarRenda(idUsuario, item.getDataLancamento(), descricao, valor,
-                    item.getDataLancamento(), cat);
+            return salvarRenda(idUsuario, item.getDataLancamento(), descricao, descricaoOrigem,
+                    valor, item.getDataLancamento(), cat);
         }
 
         return null;
@@ -97,16 +101,31 @@ public class ExtratoLinhaProcessadorService {
                                       Long idUsuario,
                                       Date dataVencimento,
                                       Parametro parametro) {
-        MovimentacaoCategoria categoria;
-        if (item.getCategoria() != null) {
-            categoria = findOrCreateCategoriaDespesa(capitalize(item.getCategoria()));
-        } else {
-            categoria = resolverCategoria(null,
-                    parametro != null ? parametro.getDespesaCategoriaPadrao() : null, "despesa");
-        }
+        String descricaoOrigem = item.getDescricao();
+        String descricao = item.getDescricao();
+        MovimentacaoCategoria categoria = null;
 
         Date vencimento = dataVencimento != null ? dataVencimento : item.getDataLancamento();
-        salvarDespesa(idUsuario, item.getDataLancamento(), item.getDescricao(),
+
+        String[] parcelamento = detectarParcelamento(descricaoOrigem);
+        if (parcelamento != null) {
+            Optional<Despesa> heranca = buscarHerancaParcela(idUsuario, parcelamento, item.getValor(), vencimento, parametro);
+            if (heranca.isPresent()) {
+                descricao = heranca.get().getLancamento().getDescricao();
+                categoria = heranca.get().getCategoria();
+            }
+        }
+
+        if (categoria == null) {
+            if (item.getCategoria() != null) {
+                categoria = findOrCreateCategoriaDespesa(capitalize(item.getCategoria()));
+            } else {
+                categoria = resolverCategoria(null,
+                        parametro != null ? parametro.getDespesaCategoriaPadrao() : null, "despesa");
+            }
+        }
+
+        salvarDespesa(idUsuario, item.getDataLancamento(), descricao, descricaoOrigem,
                 item.getValor(), vencimento, categoria, DespesaFormaPagamento.CARTAO_CREDITO);
     }
 
@@ -120,7 +139,7 @@ public class ExtratoLinhaProcessadorService {
         if (isRendaPassiva) {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getRendaPassivaCategoria() : null, "renda passiva");
-            salvarRenda(idUsuario, item.getDataMovimentacao(), item.getProduto(),
+            salvarRenda(idUsuario, item.getDataMovimentacao(), item.getProduto(), item.getProduto(),
                     item.getPrecoTotal(), item.getDataMovimentacao(), cat);
             return;
         }
@@ -128,7 +147,7 @@ public class ExtratoLinhaProcessadorService {
         MovimentacaoCategoria cat = resolverCategoria(
                 null, parametro != null ? parametro.getCategoriaPadraoMovimentacaoB3() : null, "movimentação B3");
         TipoOperacaoExtratoMovimentacaoB3 operacao = resolverOperacaoB3(item.getTipoOperacao());
-        salvarAtivo(idUsuario, item.getDataMovimentacao(), item.getProduto(),
+        salvarAtivo(idUsuario, item.getDataMovimentacao(), item.getProduto(), item.getProduto(),
                 item.getPrecoTotal(), item.getDataMovimentacao(), cat, operacao);
     }
 
@@ -187,13 +206,14 @@ public class ExtratoLinhaProcessadorService {
     }
 
     private Long salvarDespesa(Long idUsuario, Date dataLancamento, String descricao,
-                                BigDecimal valor, Date dataVencimento,
+                                String descricaoOrigem, BigDecimal valor, Date dataVencimento,
                                 MovimentacaoCategoria categoria,
                                 DespesaFormaPagamento formaPagamento) {
         Lancamento lancamento = new Lancamento();
         lancamento.setIdUsuario(idUsuario);
         lancamento.setDataLancamento(dataLancamento);
         lancamento.setDescricao(descricao);
+        lancamento.setDescricaoOrigem(descricaoOrigem);
         lancamento.setTipo(TipoLancamento.DESPESA);
         lancamento = lancamentoRepository.save(lancamento);
 
@@ -209,12 +229,13 @@ public class ExtratoLinhaProcessadorService {
     }
 
     private Long salvarRenda(Long idUsuario, Date dataLancamento, String descricao,
-                              BigDecimal valor, Date dataRecebimento,
+                              String descricaoOrigem, BigDecimal valor, Date dataRecebimento,
                               MovimentacaoCategoria categoria) {
         Lancamento lancamento = new Lancamento();
         lancamento.setIdUsuario(idUsuario);
         lancamento.setDataLancamento(dataLancamento);
         lancamento.setDescricao(descricao);
+        lancamento.setDescricaoOrigem(descricaoOrigem);
         lancamento.setTipo(TipoLancamento.RENDA);
         lancamento = lancamentoRepository.save(lancamento);
 
@@ -229,13 +250,14 @@ public class ExtratoLinhaProcessadorService {
     }
 
     private Long salvarAtivo(Long idUsuario, Date dataLancamento, String descricao,
-                              BigDecimal valor, Date dataMovimento,
+                              String descricaoOrigem, BigDecimal valor, Date dataMovimento,
                               MovimentacaoCategoria categoria,
                               TipoOperacaoExtratoMovimentacaoB3 operacao) {
         Lancamento lancamento = new Lancamento();
         lancamento.setIdUsuario(idUsuario);
         lancamento.setDataLancamento(dataLancamento);
         lancamento.setDescricao(descricao);
+        lancamento.setDescricaoOrigem(descricaoOrigem);
         lancamento.setTipo(TipoLancamento.ATIVO);
         lancamento = lancamentoRepository.save(lancamento);
 
@@ -277,6 +299,55 @@ public class ExtratoLinhaProcessadorService {
         } catch (IllegalArgumentException e) {
             return TipoOperacaoExtratoMovimentacaoB3.DEBITO;
         }
+    }
+
+    private String[] detectarParcelamento(String descricao) {
+        int idx = descricao.indexOf(" - Parcela ");
+        if (idx < 0) return null;
+        String prefixo = descricao.substring(0, idx);
+        String sufixo = descricao.substring(idx + " - Parcela ".length());
+        String[] partes = sufixo.split("/");
+        if (partes.length != 2) return null;
+        try {
+            Integer.parseInt(partes[0].trim());
+            Integer.parseInt(partes[1].trim());
+            return new String[]{prefixo, partes[0].trim(), partes[1].trim()};
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Optional<Despesa> buscarHerancaParcela(Long idUsuario,
+                                                    String[] parcelamento,
+                                                    BigDecimal valor,
+                                                    Date dataVencimentoAtual,
+                                                    Parametro parametro) {
+        int parcelaAtual = Integer.parseInt(parcelamento[1]);
+        if (parcelaAtual <= 1) return Optional.empty();
+
+        String descOrigemAnterior = parcelamento[0]
+                + " - Parcela " + (parcelaAtual - 1) + "/" + parcelamento[2];
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dataVencimentoAtual);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date fimMesAnterior = cal.getTime();
+        cal.add(Calendar.MONTH, -1);
+        Date inicioMesAnterior = cal.getTime();
+
+        return despesaRepository
+                .findParcelaAnterior(idUsuario, descOrigemAnterior, inicioMesAnterior, fimMesAnterior, valor)
+                .filter(d -> foiEditadaPeloUsuario(d, parametro));
+    }
+
+    private boolean foiEditadaPeloUsuario(Despesa despesa, Parametro parametro) {
+        boolean descricaoAlterada = !Objects.equals(
+                despesa.getLancamento().getDescricao(), despesa.getLancamento().getDescricaoOrigem());
+        boolean categoriaAlterada = parametro == null
+                || parametro.getDespesaCategoriaPadrao() == null
+                || !Objects.equals(despesa.getCategoria().getId(),
+                                   parametro.getDespesaCategoriaPadrao().getId());
+        return descricaoAlterada || categoriaAlterada;
     }
 
     private String capitalize(String str) {

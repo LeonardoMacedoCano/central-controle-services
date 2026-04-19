@@ -13,6 +13,7 @@ public class LancamentoDTO {
     private Long id;
     private Date dataLancamento;
     private String descricao;
+    private String descricaoOrigem;
     private TipoLancamento tipo;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "tipo")
@@ -33,6 +34,7 @@ public class LancamentoDTO {
         this.id = entity.getId();
         this.dataLancamento = entity.getDataLancamento();
         this.descricao = entity.getDescricao();
+        this.descricaoOrigem = entity.getDescricaoOrigem();
         this.tipo = entity.getTipo();
         return this;
     }
@@ -42,6 +44,7 @@ public class LancamentoDTO {
         entity.setId(this.id);
         entity.setDataLancamento(this.dataLancamento);
         entity.setDescricao(this.descricao);
+        entity.setDescricaoOrigem(this.descricaoOrigem);
         entity.setTipo(this.tipo);
         return entity;
     }

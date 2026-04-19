@@ -32,6 +32,9 @@ public class Lancamento implements Serializable {
     @Column(nullable = false)
     private String descricao;
 
+    @Column(name = "descricaoorigem")
+    private String descricaoOrigem;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoLancamento tipo;
