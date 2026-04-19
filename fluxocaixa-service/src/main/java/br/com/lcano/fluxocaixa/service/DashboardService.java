@@ -1,5 +1,6 @@
 package br.com.lcano.fluxocaixa.service;
 
+import br.com.lcano.fluxocaixa.dto.CategoriaOperacaoResumoDTO;
 import br.com.lcano.fluxocaixa.dto.CategoriaResumoDTO;
 import br.com.lcano.fluxocaixa.dto.DashboardDTO;
 import br.com.lcano.fluxocaixa.enums.TipoOperacaoExtratoMovimentacaoB3;
@@ -11,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,10 +43,8 @@ public class DashboardService {
                 idUsuario, TipoOperacaoExtratoMovimentacaoB3.DEBITO, inicio, fim);
         BigDecimal totalInvestidoAtivos = creditoAtivos.subtract(debitoAtivos);
 
-        List<CategoriaResumoDTO> despesasPorCategoria = toCategoriaResumo(
-                despesaRepository.sumValorByCategoriaAndPeriodo(idUsuario, inicio, fim));
-        List<CategoriaResumoDTO> receitasPorCategoria = toCategoriaResumo(
-                rendaRepository.sumValorByCategoriaAndPeriodo(idUsuario, inicio, fim));
+        List<CategoriaResumoDTO> despesasPorCategoria = despesaRepository.sumValorByCategoriaAndPeriodo(idUsuario, inicio, fim);
+        List<CategoriaResumoDTO> receitasPorCategoria = rendaRepository.sumValorByCategoriaAndPeriodo(idUsuario, inicio, fim);
         List<CategoriaResumoDTO> ativosPorCategoria = toAtivoCategoriaResumo(
                 ativoRepository.sumValorByCategoriaAndOperacaoAndPeriodo(idUsuario, inicio, fim));
 
@@ -54,33 +54,21 @@ public class DashboardService {
     }
 
     private Date[] calcularPeriodo(int ano, Integer mes) {
-        Calendar inicio = Calendar.getInstance();
-        inicio.set(ano, mes != null ? mes - 1 : Calendar.JANUARY, 1, 0, 0, 0);
-        inicio.set(Calendar.MILLISECOND, 0);
-
-        Calendar fim = (Calendar) inicio.clone();
-        if (mes != null) {
-            fim.add(Calendar.MONTH, 1);
-        } else {
-            fim.set(Calendar.YEAR, ano + 1);
-        }
-
-        return new Date[]{inicio.getTime(), fim.getTime()};
+        LocalDate inicio = mes != null ? LocalDate.of(ano, mes, 1) : LocalDate.of(ano, 1, 1);
+        LocalDate fim = mes != null ? inicio.plusMonths(1) : inicio.plusYears(1);
+        ZoneId zone = ZoneId.systemDefault();
+        return new Date[]{
+            Date.from(inicio.atStartOfDay(zone).toInstant()),
+            Date.from(fim.atStartOfDay(zone).toInstant())
+        };
     }
 
-    private List<CategoriaResumoDTO> toCategoriaResumo(List<Object[]> rows) {
-        return rows.stream()
-                .map(r -> new CategoriaResumoDTO((String) r[0], (BigDecimal) r[1]))
-                .toList();
-    }
-
-    private List<CategoriaResumoDTO> toAtivoCategoriaResumo(List<Object[]> rows) {
+    private List<CategoriaResumoDTO> toAtivoCategoriaResumo(List<CategoriaOperacaoResumoDTO> rows) {
         Map<String, BigDecimal> map = new LinkedHashMap<>();
-        for (Object[] r : rows) {
-            String cat = (String) r[0];
-            TipoOperacaoExtratoMovimentacaoB3 op = (TipoOperacaoExtratoMovimentacaoB3) r[1];
-            BigDecimal val = (BigDecimal) r[2];
-            map.merge(cat, op == TipoOperacaoExtratoMovimentacaoB3.CREDITO ? val : val.negate(), BigDecimal::add);
+        for (CategoriaOperacaoResumoDTO r : rows) {
+            map.merge(r.getCategoria(),
+                      r.getOperacao() == TipoOperacaoExtratoMovimentacaoB3.CREDITO ? r.getTotal() : r.getTotal().negate(),
+                      BigDecimal::add);
         }
         return map.entrySet().stream()
                 .map(e -> new CategoriaResumoDTO(e.getKey(), e.getValue()))

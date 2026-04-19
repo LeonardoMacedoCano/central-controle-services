@@ -1,6 +1,7 @@
 package br.com.lcano.fluxocaixa.repository;
 
 import br.com.lcano.fluxocaixa.domain.Renda;
+import br.com.lcano.fluxocaixa.dto.CategoriaResumoDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,10 +23,11 @@ public interface RendaRepository extends JpaRepository<Renda, Long> {
                                  @Param("inicio") Date inicio,
                                  @Param("fim") Date fim);
 
-    @Query("SELECT r.categoria.descricao, SUM(r.valor) FROM Renda r JOIN r.lancamento l " +
+    @Query("SELECT new br.com.lcano.fluxocaixa.dto.CategoriaResumoDTO(r.categoria.descricao, SUM(r.valor)) " +
+           "FROM Renda r JOIN r.lancamento l " +
            "WHERE l.idUsuario = :idUsuario AND r.dataRecebimento >= :inicio AND r.dataRecebimento < :fim " +
            "GROUP BY r.categoria.descricao ORDER BY SUM(r.valor) DESC")
-    List<Object[]> sumValorByCategoriaAndPeriodo(@Param("idUsuario") Long idUsuario,
-                                                 @Param("inicio") Date inicio,
-                                                 @Param("fim") Date fim);
+    List<CategoriaResumoDTO> sumValorByCategoriaAndPeriodo(@Param("idUsuario") Long idUsuario,
+                                                           @Param("inicio") Date inicio,
+                                                           @Param("fim") Date fim);
 }

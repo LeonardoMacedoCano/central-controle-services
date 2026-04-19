@@ -1,6 +1,7 @@
 package br.com.lcano.fluxocaixa.repository;
 
 import br.com.lcano.fluxocaixa.domain.Ativo;
+import br.com.lcano.fluxocaixa.dto.CategoriaOperacaoResumoDTO;
 import br.com.lcano.fluxocaixa.enums.TipoOperacaoExtratoMovimentacaoB3;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,10 +26,11 @@ public interface AtivoRepository extends JpaRepository<Ativo, Long> {
                                             @Param("inicio") Date inicio,
                                             @Param("fim") Date fim);
 
-    @Query("SELECT a.categoria.descricao, a.operacao, SUM(a.valor) FROM Ativo a JOIN a.lancamento l " +
+    @Query("SELECT new br.com.lcano.fluxocaixa.dto.CategoriaOperacaoResumoDTO(a.categoria.descricao, a.operacao, SUM(a.valor)) " +
+           "FROM Ativo a JOIN a.lancamento l " +
            "WHERE l.idUsuario = :idUsuario AND a.dataMovimento >= :inicio AND a.dataMovimento < :fim " +
            "GROUP BY a.categoria.descricao, a.operacao ORDER BY a.categoria.descricao")
-    List<Object[]> sumValorByCategoriaAndOperacaoAndPeriodo(@Param("idUsuario") Long idUsuario,
-                                                            @Param("inicio") Date inicio,
-                                                            @Param("fim") Date fim);
+    List<CategoriaOperacaoResumoDTO> sumValorByCategoriaAndOperacaoAndPeriodo(@Param("idUsuario") Long idUsuario,
+                                                                              @Param("inicio") Date inicio,
+                                                                              @Param("fim") Date fim);
 }
