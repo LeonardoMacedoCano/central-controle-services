@@ -1,7 +1,7 @@
 package br.com.lcano.fluxocaixa.resource;
 
-import br.com.lcano.fluxocaixa.dto.RegraExtratoContaCorrenteDTO;
-import br.com.lcano.fluxocaixa.service.RegraExtratoContaCorrenteService;
+import br.com.lcano.fluxocaixa.dto.MapeamentoExtratoBancarioDTO;
+import br.com.lcano.fluxocaixa.service.MapeamentoExtratoBancarioService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,19 +10,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/regra-extrato-conta-corrente")
+@RequestMapping("/api/mapeamento-extrato-bancario")
 @AllArgsConstructor
-public class RegraExtratoContaCorrenteResource {
+public class MapeamentoExtratoBancarioResource {
 
-    private final RegraExtratoContaCorrenteService service;
+    private final MapeamentoExtratoBancarioService service;
 
     @GetMapping("/{id}")
-    public RegraExtratoContaCorrenteDTO findById(@PathVariable Long id) {
+    public MapeamentoExtratoBancarioDTO findById(@PathVariable Long id) {
         return service.findByIdAsDto(id);
     }
 
     @GetMapping("/search")
-    public Page<RegraExtratoContaCorrenteDTO> search(
+    public Page<MapeamentoExtratoBancarioDTO> search(
             @RequestParam(required = false) String filter,
             Pageable pageable
     ) {
@@ -30,14 +30,14 @@ public class RegraExtratoContaCorrenteResource {
     }
 
     @PostMapping
-    public Map<String, Object> save(@RequestBody RegraExtratoContaCorrenteDTO dto) {
+    public Map<String, Object> save(@RequestBody MapeamentoExtratoBancarioDTO dto) {
         Long id = service.save(dto);
-        return Map.of("success", "Regra salva com sucesso.", "id", id);
+        return Map.of("success", "Mapeamento salvo com sucesso.", "id", id);
     }
 
     @DeleteMapping("/{id}")
     public Map<String, Object> delete(@PathVariable Long id) {
         service.delete(id);
-        return Map.of("success", "Regra deletada com sucesso.");
+        return Map.of("success", "Mapeamento deletado com sucesso.");
     }
 }

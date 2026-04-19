@@ -1,13 +1,13 @@
 package br.com.lcano.fluxocaixa.dto;
 
-import br.com.lcano.fluxocaixa.domain.RegraExtratoContaCorrente;
-import br.com.lcano.fluxocaixa.enums.TipoRegraExtratoContaCorrente;
+import br.com.lcano.fluxocaixa.domain.MapeamentoExtratoBancario;
+import br.com.lcano.fluxocaixa.enums.TipoMapeamentoExtratoBancario;
 import lombok.Data;
 
 @Data
-public class RegraExtratoContaCorrenteDTO {
+public class MapeamentoExtratoBancarioDTO {
     private Long id;
-    private TipoRegraExtratoContaCorrente tipoRegra;
+    private TipoMapeamentoExtratoBancario tipoRegra;
     private String descricao;
     private String descricaoMatch;
     private String descricaoDestino;
@@ -17,7 +17,7 @@ public class RegraExtratoContaCorrenteDTO {
     private Long prioridade;
     private boolean ativo;
 
-    public RegraExtratoContaCorrenteDTO fromEntity(RegraExtratoContaCorrente entity) {
+    public MapeamentoExtratoBancarioDTO fromEntity(MapeamentoExtratoBancario entity) {
         this.id = entity.getId();
         this.tipoRegra = entity.getTipoRegra();
         this.descricao = entity.getDescricao();
@@ -37,8 +37,8 @@ public class RegraExtratoContaCorrenteDTO {
         return this;
     }
 
-    public RegraExtratoContaCorrente toEntity() {
-        RegraExtratoContaCorrente entity = new RegraExtratoContaCorrente();
+    public MapeamentoExtratoBancario toEntity() {
+        MapeamentoExtratoBancario entity = new MapeamentoExtratoBancario();
         entity.setId(this.id);
         entity.setTipoRegra(this.tipoRegra);
         entity.setDescricao(this.descricao);

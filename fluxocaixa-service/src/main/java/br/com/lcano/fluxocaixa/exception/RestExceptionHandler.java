@@ -23,8 +23,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, MSG_ERRO_GENERICO + ex.getMessage());
     }
 
-    @ExceptionHandler(RegraExtratoContaCorrenteException.RegraNaoEncontrado.class)
-    protected ResponseEntity<Object> handleRegraNaoEncontrado(RegraExtratoContaCorrenteException.RegraNaoEncontrado ex) {
+    @ExceptionHandler(MapeamentoExtratoBancarioException.MapeamentoNaoEncontrado.class)
+    protected ResponseEntity<Object> handleMapeamentoNaoEncontrado(MapeamentoExtratoBancarioException.MapeamentoNaoEncontrado ex) {
         return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 

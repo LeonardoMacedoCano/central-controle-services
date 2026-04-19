@@ -5,16 +5,16 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
-    <changeSet id="create-table-regraextratocontacorrente" author="lcano">
-        <preConditions onFail="MARK_RAN" onFailMessage="A tabela regraextratocontacorrente já existe">
+    <changeSet id="create-table-mapeamentoextratobancario" author="lcano">
+        <preConditions onFail="MARK_RAN" onFailMessage="A tabela mapeamentoextratobancario já existe">
             <not>
-                <tableExists tableName="regraextratocontacorrente"/>
+                <tableExists tableName="mapeamentoextratobancario"/>
             </not>
         </preConditions>
 
-        <createTable tableName="regraextratocontacorrente">
+        <createTable tableName="mapeamentoextratobancario">
             <column name="id" type="${integer}" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pkregraextratocontacorrente"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pkmapeamentoextratobancario"/>
             </column>
             <column name="idusuario" type="${integer}">
                 <constraints nullable="false"/>
@@ -40,21 +40,21 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseTableName="regraextratocontacorrente"
+        <addForeignKeyConstraint baseTableName="mapeamentoextratobancario"
                                  baseColumnNames="idcategoriadespesadestino"
-                                 constraintName="fkregraextratocontacorcatdesp"
+                                 constraintName="fkmapeamentoextratobancariocatdesp"
                                  referencedTableName="movimentacaocategoria"
                                  referencedColumnNames="id"/>
 
-        <addForeignKeyConstraint baseTableName="regraextratocontacorrente"
+        <addForeignKeyConstraint baseTableName="mapeamentoextratobancario"
                                  baseColumnNames="idcategoriarendadestino"
-                                 constraintName="fkregraextratocontacorcatren"
+                                 constraintName="fkmapeamentoextratobancariocatren"
                                  referencedTableName="movimentacaocategoria"
                                  referencedColumnNames="id"/>
 
-        <addForeignKeyConstraint baseTableName="regraextratocontacorrente"
+        <addForeignKeyConstraint baseTableName="mapeamentoextratobancario"
                                  baseColumnNames="idcategoriaativodestino"
-                                 constraintName="fkregraextratocontacorcatativo"
+                                 constraintName="fkmapeamentoextratobancariocatativo"
                                  referencedTableName="movimentacaocategoria"
                                  referencedColumnNames="id"/>
     </changeSet>

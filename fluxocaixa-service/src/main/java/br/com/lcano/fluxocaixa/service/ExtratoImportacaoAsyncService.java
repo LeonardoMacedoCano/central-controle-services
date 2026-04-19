@@ -1,15 +1,15 @@
 package br.com.lcano.fluxocaixa.service;
 
 import br.com.lcano.fluxocaixa.domain.ImportacaoExtrato;
+import br.com.lcano.fluxocaixa.domain.MapeamentoExtratoBancario;
 import br.com.lcano.fluxocaixa.domain.Parametro;
-import br.com.lcano.fluxocaixa.domain.RegraExtratoContaCorrente;
 import br.com.lcano.fluxocaixa.dto.ExtratoContaCorrenteDTO;
 import br.com.lcano.fluxocaixa.dto.ExtratoFaturaCartaoDTO;
 import br.com.lcano.fluxocaixa.dto.ExtratoMovimentacaoB3DTO;
 import br.com.lcano.fluxocaixa.enums.StatusImportacaoExtrato;
 import br.com.lcano.fluxocaixa.repository.ImportacaoExtratoRepository;
+import br.com.lcano.fluxocaixa.repository.MapeamentoExtratoBancarioRepository;
 import br.com.lcano.fluxocaixa.repository.ParametroRepository;
-import br.com.lcano.fluxocaixa.repository.RegraExtratoContaCorrenteRepository;
 import br.com.lcano.fluxocaixa.utils.ExtratoContaCorrenteCSVParser;
 import br.com.lcano.fluxocaixa.utils.ExtratoFaturaCartaoCSVParser;
 import br.com.lcano.fluxocaixa.utils.ExtratoMovimentacaoB3XLSXParser;
@@ -28,7 +28,7 @@ import java.util.List;
 public class ExtratoImportacaoAsyncService {
 
     private final ImportacaoExtratoRepository importacaoExtratoRepository;
-    private final RegraExtratoContaCorrenteRepository regraExtratoContaCorrenteRepository;
+    private final MapeamentoExtratoBancarioRepository mapeamentoExtratoBancarioRepository;
     private final ParametroRepository parametroRepository;
     private final ExtratoLinhaProcessadorService linhaProcessador;
     private final NotificacaoClient notificacaoClient;
@@ -46,10 +46,10 @@ public class ExtratoImportacaoAsyncService {
             importacaoExtratoRepository.save(importacao);
 
             Parametro parametro = parametroRepository.findByIdUsuario(importacao.getIdUsuario());
-            List<RegraExtratoContaCorrente> regras = regraExtratoContaCorrenteRepository
+            List<MapeamentoExtratoBancario> mapeamentos = mapeamentoExtratoBancarioRepository
                     .findByIdUsuarioAndAtivoOrderByPrioridadeAsc(importacao.getIdUsuario(), true);
 
-            int[] resultado = linhaProcessador.processarBatchContaCorrente(itens, importacao.getIdUsuario(), regras, parametro);
+            int[] resultado = linhaProcessador.processarBatchContaCorrente(itens, importacao.getIdUsuario(), mapeamentos, parametro);
             concluirProcessamento(importacao, resultado[0], resultado[1]);
             notificarSucesso(importacao, resultado[0], resultado[1]);
         } catch (Exception e) {
@@ -71,8 +71,10 @@ public class ExtratoImportacaoAsyncService {
             importacaoExtratoRepository.save(importacao);
 
             Parametro parametro = parametroRepository.findByIdUsuario(importacao.getIdUsuario());
+            List<MapeamentoExtratoBancario> mapeamentos = mapeamentoExtratoBancarioRepository
+                    .findByIdUsuarioAndAtivoOrderByPrioridadeAsc(importacao.getIdUsuario(), true);
 
-            int[] resultado = linhaProcessador.processarBatchFaturaCartao(itens, importacao.getIdUsuario(), dataVencimento, parametro);
+            int[] resultado = linhaProcessador.processarBatchFaturaCartao(itens, importacao.getIdUsuario(), dataVencimento, parametro, mapeamentos);
             concluirProcessamento(importacao, resultado[0], resultado[1]);
             notificarSucesso(importacao, resultado[0], resultado[1]);
         } catch (Exception e) {

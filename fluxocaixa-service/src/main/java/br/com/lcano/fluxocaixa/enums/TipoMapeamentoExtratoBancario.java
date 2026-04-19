@@ -3,7 +3,7 @@ package br.com.lcano.fluxocaixa.enums;
 import lombok.Getter;
 
 @Getter
-public enum TipoRegraExtratoContaCorrente {
+public enum TipoMapeamentoExtratoBancario {
     IGNORAR_DESPESA("IGNORAR_DESPESA"),
     CLASSIFICAR_DESPESA("CLASSIFICAR_DESPESA"),
     IGNORAR_RENDA("IGNORAR_RENDA"),
@@ -12,7 +12,7 @@ public enum TipoRegraExtratoContaCorrente {
 
     private final String descricao;
 
-    TipoRegraExtratoContaCorrente(String descricao) {
+    TipoMapeamentoExtratoBancario(String descricao) {
         this.descricao = descricao;
     }
 

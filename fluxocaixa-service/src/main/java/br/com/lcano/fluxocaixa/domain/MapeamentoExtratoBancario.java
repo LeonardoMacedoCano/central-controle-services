@@ -1,6 +1,6 @@
 package br.com.lcano.fluxocaixa.domain;
 
-import br.com.lcano.fluxocaixa.enums.TipoRegraExtratoContaCorrente;
+import br.com.lcano.fluxocaixa.enums.TipoMapeamentoExtratoBancario;
 import br.com.lcano.fluxocaixa.utils.BooleanToCharConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -17,8 +17,8 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "regraextratocontacorrente")
-public class RegraExtratoContaCorrente {
+@Table(name = "mapeamentoextratobancario")
+public class MapeamentoExtratoBancario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +28,7 @@ public class RegraExtratoContaCorrente {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tiporegra", nullable = false)
-    private TipoRegraExtratoContaCorrente tipoRegra;
+    private TipoMapeamentoExtratoBancario tipoRegra;
 
     @Column(nullable = false)
     private String descricao;

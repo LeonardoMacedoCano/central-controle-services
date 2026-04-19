@@ -31,17 +31,17 @@ public class ExtratoLinhaProcessadorService {
     @Transactional
     public Long processarContaCorrente(ExtratoContaCorrenteDTO item,
                                        Long idUsuario,
-                                       List<RegraExtratoContaCorrente> regras,
+                                       List<MapeamentoExtratoBancario> mapeamentos,
                                        Parametro parametro) {
         String descricaoOrigem = item.getDescricao();
         String descricao = item.getDescricao();
         BigDecimal valor = item.getValor();
 
-        for (RegraExtratoContaCorrente regra : regras) {
-            if (regra.getDescricaoMatch() == null) continue;
-            if (!descricao.toLowerCase().contains(regra.getDescricaoMatch().toLowerCase())) continue;
+        for (MapeamentoExtratoBancario mapeamento : mapeamentos) {
+            if (mapeamento.getDescricaoMatch() == null) continue;
+            if (!descricao.toLowerCase().contains(mapeamento.getDescricaoMatch().toLowerCase())) continue;
 
-            switch (regra.getTipoRegra()) {
+            switch (mapeamento.getTipoRegra()) {
                 case IGNORAR_DESPESA -> {
                     if (valor.compareTo(BigDecimal.ZERO) < 0) return null;
                 }
@@ -51,10 +51,10 @@ public class ExtratoLinhaProcessadorService {
                 case CLASSIFICAR_DESPESA -> {
                     if (valor.compareTo(BigDecimal.ZERO) < 0) {
                         MovimentacaoCategoria cat = resolverCategoria(
-                                regra.getDespesaCategoriaDestino(),
+                                mapeamento.getDespesaCategoriaDestino(),
                                 parametro != null ? parametro.getDespesaCategoriaPadrao() : null,
                                 "despesa");
-                        String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
+                        String desc = mapeamento.getDescricaoDestino() != null ? mapeamento.getDescricaoDestino() : descricao;
                         return salvarDespesa(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
                                 valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
                     }
@@ -62,19 +62,19 @@ public class ExtratoLinhaProcessadorService {
                 case CLASSIFICAR_RENDA -> {
                     if (valor.compareTo(BigDecimal.ZERO) > 0) {
                         MovimentacaoCategoria cat = resolverCategoria(
-                                regra.getRendaCategoriaDestino(),
+                                mapeamento.getRendaCategoriaDestino(),
                                 parametro != null ? parametro.getRendaCategoriaPadrao() : null,
                                 "renda");
-                        String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
+                        String desc = mapeamento.getDescricaoDestino() != null ? mapeamento.getDescricaoDestino() : descricao;
                         return salvarRenda(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
                                 valor, item.getDataLancamento(), cat);
                     }
                 }
                 case CLASSIFICAR_ATIVO -> {
                     MovimentacaoCategoria cat = resolverCategoria(
-                            regra.getAtivoCategoriaDestino(), null, "ativo");
+                            mapeamento.getAtivoCategoriaDestino(), null, "ativo");
                     TipoOperacaoExtratoMovimentacaoB3 operacao = TipoOperacaoExtratoMovimentacaoB3.CREDITO;
-                    String desc = regra.getDescricaoDestino() != null ? regra.getDescricaoDestino() : descricao;
+                    String desc = mapeamento.getDescricaoDestino() != null ? mapeamento.getDescricaoDestino() : descricao;
                     return salvarAtivo(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
                             valor.abs(), item.getDataLancamento(), cat, operacao);
                 }
@@ -100,7 +100,8 @@ public class ExtratoLinhaProcessadorService {
     public void processarFaturaCartao(ExtratoFaturaCartaoDTO item,
                                       Long idUsuario,
                                       Date dataVencimento,
-                                      Parametro parametro) {
+                                      Parametro parametro,
+                                      List<MapeamentoExtratoBancario> mapeamentos) {
         String descricaoOrigem = item.getDescricao();
         String descricao = item.getDescricao();
         MovimentacaoCategoria categoria = null;
@@ -113,6 +114,20 @@ public class ExtratoLinhaProcessadorService {
             if (heranca.isPresent()) {
                 descricao = heranca.get().getLancamento().getDescricao();
                 categoria = heranca.get().getCategoria();
+            }
+        }
+
+        if (categoria == null) {
+            for (MapeamentoExtratoBancario mapeamento : mapeamentos) {
+                if (mapeamento.getDescricaoMatch() == null) continue;
+                if (!descricaoOrigem.toLowerCase().contains(mapeamento.getDescricaoMatch().toLowerCase())) continue;
+
+                if (mapeamento.getTipoRegra() == TipoMapeamentoExtratoBancario.IGNORAR_DESPESA) return;
+                if (mapeamento.getTipoRegra() == TipoMapeamentoExtratoBancario.CLASSIFICAR_DESPESA) {
+                    if (mapeamento.getDescricaoDestino() != null) descricao = mapeamento.getDescricaoDestino();
+                    if (mapeamento.getDespesaCategoriaDestino() != null) categoria = mapeamento.getDespesaCategoriaDestino();
+                    break;
+                }
             }
         }
 
@@ -154,12 +169,12 @@ public class ExtratoLinhaProcessadorService {
     @Transactional
     public int[] processarBatchContaCorrente(List<ExtratoContaCorrenteDTO> itens,
                                               Long idUsuario,
-                                              List<RegraExtratoContaCorrente> regras,
+                                              List<MapeamentoExtratoBancario> mapeamentos,
                                               Parametro parametro) {
         int processadas = 0, ignoradas = 0;
         for (int i = 0; i < itens.size(); i++) {
             try {
-                Long id = processarContaCorrente(itens.get(i), idUsuario, regras, parametro);
+                Long id = processarContaCorrente(itens.get(i), idUsuario, mapeamentos, parametro);
                 if (id != null) processadas++; else ignoradas++;
             } catch (Exception e) {
                 throw new ExtratoException.ErroNaLinha(i + 2, e.getMessage());
@@ -172,7 +187,8 @@ public class ExtratoLinhaProcessadorService {
     public int[] processarBatchFaturaCartao(List<ExtratoFaturaCartaoDTO> itens,
                                              Long idUsuario,
                                              Date dataVencimento,
-                                             Parametro parametro) {
+                                             Parametro parametro,
+                                             List<MapeamentoExtratoBancario> mapeamentos) {
         int processadas = 0, ignoradas = 0;
         for (int i = 0; i < itens.size(); i++) {
             try {
@@ -180,7 +196,7 @@ public class ExtratoLinhaProcessadorService {
                     ignoradas++;
                     continue;
                 }
-                processarFaturaCartao(itens.get(i), idUsuario, dataVencimento, parametro);
+                processarFaturaCartao(itens.get(i), idUsuario, dataVencimento, parametro, mapeamentos);
                 processadas++;
             } catch (Exception e) {
                 throw new ExtratoException.ErroNaLinha(i + 2, e.getMessage());
