@@ -34,9 +34,9 @@ public class ExtratoMovimentacaoB3XLSXParser {
                     Date dataMovimentacao = getCellDate(row, 1);
                     String tipoMovimentacao = getCellString(row, 2);
                     String produto = getCellString(row, 3);
-                    BigDecimal quantidade = parseMonetario(getCellString(row, 5));
-                    BigDecimal precoUnitario = parseMonetario(getCellString(row, 6));
-                    BigDecimal precoTotal = parseMonetario(getCellString(row, 7));
+                    BigDecimal quantidade = getCellNumerico(row, 5);
+                    BigDecimal precoUnitario = getCellNumerico(row, 6);
+                    BigDecimal precoTotal = getCellNumerico(row, 7);
 
                     if (tipoOperacao.isEmpty() || dataMovimentacao == null) continue;
 
@@ -74,17 +74,12 @@ public class ExtratoMovimentacaoB3XLSXParser {
         }
     }
 
-    private static BigDecimal parseMonetario(String valor) {
-        if (valor == null || valor.isBlank() || valor.equals("-")) return BigDecimal.ZERO;
-        try {
-            return new BigDecimal(
-                    valor.replace("R$", "")
-                            .replace(".", "")
-                            .replace(",", ".")
-                            .trim()
-            );
-        } catch (NumberFormatException e) {
-            return BigDecimal.ZERO;
+    private static BigDecimal getCellNumerico(Row row, int index) {
+        Cell cell = row.getCell(index, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+        if (cell == null) return BigDecimal.ZERO;
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return BigDecimal.valueOf(cell.getNumericCellValue());
         }
+        return BigDecimal.ZERO;
     }
 }
