@@ -29,6 +29,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="descricaoorigem" type="${varchar_255}"/>
+            <column name="idarquivoextrato" type="${integer}"/>
         </createTable>
     </changeSet>
 

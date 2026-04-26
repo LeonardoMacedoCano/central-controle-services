@@ -47,4 +47,11 @@ public class Lancamento implements Serializable {
 
     @OneToOne(mappedBy = "lancamento", cascade = CascadeType.ALL)
     private Ativo ativo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idarquivoextrato")
+    private ImportacaoExtrato importacao;
+
+    @Column(name = "idarquivoextrato", insertable = false, updatable = false)
+    private Long idArquivoExtrato;
 }

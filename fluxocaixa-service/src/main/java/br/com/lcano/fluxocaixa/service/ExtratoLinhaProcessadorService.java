@@ -27,12 +27,14 @@ public class ExtratoLinhaProcessadorService {
     private final RendaRepository rendaRepository;
     private final AtivoRepository ativoRepository;
     private final MovimentacaoCategoriaRepository movimentacaoCategoriaRepository;
+    private final ImportacaoExtratoRepository importacaoExtratoRepository;
 
     @Transactional
     public Long processarContaCorrente(ExtratoContaCorrenteDTO item,
                                        Long idUsuario,
                                        List<MapeamentoExtratoBancario> mapeamentos,
-                                       Parametro parametro) {
+                                       Parametro parametro,
+                                       Long idImportacao) {
         String descricaoOrigem = item.getDescricao();
         String descricao = item.getDescricao();
         BigDecimal valor = item.getValor();
@@ -56,7 +58,7 @@ public class ExtratoLinhaProcessadorService {
                                 "despesa");
                         String desc = mapeamento.getDescricaoDestino() != null ? mapeamento.getDescricaoDestino() : descricao;
                         return salvarDespesa(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
-                                valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
+                                valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO, idImportacao);
                     }
                 }
                 case CLASSIFICAR_RENDA -> {
@@ -67,7 +69,7 @@ public class ExtratoLinhaProcessadorService {
                                 "renda");
                         String desc = mapeamento.getDescricaoDestino() != null ? mapeamento.getDescricaoDestino() : descricao;
                         return salvarRenda(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
-                                valor, item.getDataLancamento(), cat);
+                                valor, item.getDataLancamento(), cat, idImportacao);
                     }
                 }
                 case CLASSIFICAR_ATIVO -> {
@@ -76,7 +78,7 @@ public class ExtratoLinhaProcessadorService {
                     TipoOperacaoExtratoMovimentacaoB3 operacao = TipoOperacaoExtratoMovimentacaoB3.CREDITO;
                     String desc = mapeamento.getDescricaoDestino() != null ? mapeamento.getDescricaoDestino() : descricao;
                     return salvarAtivo(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
-                            valor.abs(), item.getDataLancamento(), cat, operacao);
+                            valor.abs(), item.getDataLancamento(), cat, operacao, idImportacao);
                 }
             }
         }
@@ -85,12 +87,12 @@ public class ExtratoLinhaProcessadorService {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getDespesaCategoriaPadrao() : null, "despesa");
             return salvarDespesa(idUsuario, item.getDataLancamento(), descricao, descricaoOrigem,
-                    valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO);
+                    valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO, idImportacao);
         } else if (valor.compareTo(BigDecimal.ZERO) > 0) {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getRendaCategoriaPadrao() : null, "renda");
             return salvarRenda(idUsuario, item.getDataLancamento(), descricao, descricaoOrigem,
-                    valor, item.getDataLancamento(), cat);
+                    valor, item.getDataLancamento(), cat, idImportacao);
         }
 
         return null;
@@ -101,7 +103,8 @@ public class ExtratoLinhaProcessadorService {
                                       Long idUsuario,
                                       Date dataVencimento,
                                       Parametro parametro,
-                                      List<MapeamentoExtratoBancario> mapeamentos) {
+                                      List<MapeamentoExtratoBancario> mapeamentos,
+                                      Long idImportacao) {
         String descricaoOrigem = item.getDescricao();
         String descricao = item.getDescricao();
         MovimentacaoCategoria categoria = null;
@@ -141,13 +144,14 @@ public class ExtratoLinhaProcessadorService {
         }
 
         salvarDespesa(idUsuario, item.getDataLancamento(), descricao, descricaoOrigem,
-                item.getValor(), vencimento, categoria, DespesaFormaPagamento.CARTAO_CREDITO);
+                item.getValor(), vencimento, categoria, DespesaFormaPagamento.CARTAO_CREDITO, idImportacao);
     }
 
     @Transactional
     public void processarMovimentacaoB3(ExtratoMovimentacaoB3DTO item,
                                         Long idUsuario,
-                                        Parametro parametro) {
+                                        Parametro parametro,
+                                        Long idImportacao) {
         String tipoMov = item.getTipoMovimentacao() != null ? item.getTipoMovimentacao().toLowerCase() : "";
         boolean isRendaPassiva = tipoMov.contains("dividendo") || tipoMov.contains("juros sobre capital");
 
@@ -155,7 +159,7 @@ public class ExtratoLinhaProcessadorService {
             MovimentacaoCategoria cat = resolverCategoria(
                     null, parametro != null ? parametro.getRendaPassivaCategoria() : null, "renda passiva");
             salvarRenda(idUsuario, item.getDataMovimentacao(), item.getProduto(), item.getProduto(),
-                    item.getPrecoTotal(), item.getDataMovimentacao(), cat);
+                    item.getPrecoTotal(), item.getDataMovimentacao(), cat, idImportacao);
             return;
         }
 
@@ -163,18 +167,19 @@ public class ExtratoLinhaProcessadorService {
                 null, parametro != null ? parametro.getCategoriaPadraoMovimentacaoB3() : null, "movimentação B3");
         TipoOperacaoExtratoMovimentacaoB3 operacao = resolverOperacaoB3(item.getTipoOperacao());
         salvarAtivo(idUsuario, item.getDataMovimentacao(), item.getProduto(), item.getProduto(),
-                item.getPrecoTotal(), item.getDataMovimentacao(), cat, operacao);
+                item.getPrecoTotal(), item.getDataMovimentacao(), cat, operacao, idImportacao);
     }
 
     @Transactional
     public int[] processarBatchContaCorrente(List<ExtratoContaCorrenteDTO> itens,
                                               Long idUsuario,
                                               List<MapeamentoExtratoBancario> mapeamentos,
-                                              Parametro parametro) {
+                                              Parametro parametro,
+                                              Long idImportacao) {
         int processadas = 0, ignoradas = 0;
         for (int i = 0; i < itens.size(); i++) {
             try {
-                Long id = processarContaCorrente(itens.get(i), idUsuario, mapeamentos, parametro);
+                Long id = processarContaCorrente(itens.get(i), idUsuario, mapeamentos, parametro, idImportacao);
                 if (id != null) processadas++; else ignoradas++;
             } catch (Exception e) {
                 throw new ExtratoException.ErroNaLinha(i + 2, e.getMessage());
@@ -188,7 +193,8 @@ public class ExtratoLinhaProcessadorService {
                                              Long idUsuario,
                                              Date dataVencimento,
                                              Parametro parametro,
-                                             List<MapeamentoExtratoBancario> mapeamentos) {
+                                             List<MapeamentoExtratoBancario> mapeamentos,
+                                             Long idImportacao) {
         int processadas = 0, ignoradas = 0;
         for (int i = 0; i < itens.size(); i++) {
             try {
@@ -196,7 +202,7 @@ public class ExtratoLinhaProcessadorService {
                     ignoradas++;
                     continue;
                 }
-                processarFaturaCartao(itens.get(i), idUsuario, dataVencimento, parametro, mapeamentos);
+                processarFaturaCartao(itens.get(i), idUsuario, dataVencimento, parametro, mapeamentos, idImportacao);
                 processadas++;
             } catch (Exception e) {
                 throw new ExtratoException.ErroNaLinha(i + 2, e.getMessage());
@@ -208,11 +214,12 @@ public class ExtratoLinhaProcessadorService {
     @Transactional
     public int[] processarBatchMovimentacaoB3(List<ExtratoMovimentacaoB3DTO> itens,
                                                Long idUsuario,
-                                               Parametro parametro) {
+                                               Parametro parametro,
+                                               Long idImportacao) {
         int processadas = 0, ignoradas = 0;
         for (int i = 0; i < itens.size(); i++) {
             try {
-                processarMovimentacaoB3(itens.get(i), idUsuario, parametro);
+                processarMovimentacaoB3(itens.get(i), idUsuario, parametro, idImportacao);
                 processadas++;
             } catch (Exception e) {
                 throw new ExtratoException.ErroNaLinha(i + 2, e.getMessage());
@@ -224,13 +231,17 @@ public class ExtratoLinhaProcessadorService {
     private Long salvarDespesa(Long idUsuario, Date dataLancamento, String descricao,
                                 String descricaoOrigem, BigDecimal valor, Date dataVencimento,
                                 MovimentacaoCategoria categoria,
-                                DespesaFormaPagamento formaPagamento) {
+                                DespesaFormaPagamento formaPagamento,
+                                Long idImportacao) {
         Lancamento lancamento = new Lancamento();
         lancamento.setIdUsuario(idUsuario);
         lancamento.setDataLancamento(dataLancamento);
         lancamento.setDescricao(descricao);
         lancamento.setDescricaoOrigem(descricaoOrigem);
         lancamento.setTipo(TipoLancamento.DESPESA);
+        if (idImportacao != null) {
+            lancamento.setImportacao(importacaoExtratoRepository.getReferenceById(idImportacao));
+        }
         lancamento = lancamentoRepository.save(lancamento);
 
         Despesa despesa = new Despesa();
@@ -246,13 +257,17 @@ public class ExtratoLinhaProcessadorService {
 
     private Long salvarRenda(Long idUsuario, Date dataLancamento, String descricao,
                               String descricaoOrigem, BigDecimal valor, Date dataRecebimento,
-                              MovimentacaoCategoria categoria) {
+                              MovimentacaoCategoria categoria,
+                              Long idImportacao) {
         Lancamento lancamento = new Lancamento();
         lancamento.setIdUsuario(idUsuario);
         lancamento.setDataLancamento(dataLancamento);
         lancamento.setDescricao(descricao);
         lancamento.setDescricaoOrigem(descricaoOrigem);
         lancamento.setTipo(TipoLancamento.RENDA);
+        if (idImportacao != null) {
+            lancamento.setImportacao(importacaoExtratoRepository.getReferenceById(idImportacao));
+        }
         lancamento = lancamentoRepository.save(lancamento);
 
         Renda renda = new Renda();
@@ -268,13 +283,17 @@ public class ExtratoLinhaProcessadorService {
     private Long salvarAtivo(Long idUsuario, Date dataLancamento, String descricao,
                               String descricaoOrigem, BigDecimal valor, Date dataMovimento,
                               MovimentacaoCategoria categoria,
-                              TipoOperacaoExtratoMovimentacaoB3 operacao) {
+                              TipoOperacaoExtratoMovimentacaoB3 operacao,
+                              Long idImportacao) {
         Lancamento lancamento = new Lancamento();
         lancamento.setIdUsuario(idUsuario);
         lancamento.setDataLancamento(dataLancamento);
         lancamento.setDescricao(descricao);
         lancamento.setDescricaoOrigem(descricaoOrigem);
         lancamento.setTipo(TipoLancamento.ATIVO);
+        if (idImportacao != null) {
+            lancamento.setImportacao(importacaoExtratoRepository.getReferenceById(idImportacao));
+        }
         lancamento = lancamentoRepository.save(lancamento);
 
         Ativo ativo = new Ativo();

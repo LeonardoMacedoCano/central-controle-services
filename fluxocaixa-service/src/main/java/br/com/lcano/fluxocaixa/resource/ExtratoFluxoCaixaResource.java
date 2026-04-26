@@ -3,6 +3,8 @@ package br.com.lcano.fluxocaixa.resource;
 import br.com.lcano.fluxocaixa.dto.ImportacaoExtratoDTO;
 import br.com.lcano.fluxocaixa.service.ExtratoFluxoCaixaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,5 +39,15 @@ public class ExtratoFluxoCaixaResource {
     @GetMapping("/{id}/status")
     public ResponseEntity<ImportacaoExtratoDTO> findStatusById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findStatusById(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ImportacaoExtratoDTO>> search(Pageable pageable) {
+        return ResponseEntity.ok(service.search(pageable));
+    }
+
+    @GetMapping("/{id}/arquivo")
+    public ResponseEntity<byte[]> downloadArquivo(@PathVariable Long id) {
+        return service.downloadArquivo(id);
     }
 }

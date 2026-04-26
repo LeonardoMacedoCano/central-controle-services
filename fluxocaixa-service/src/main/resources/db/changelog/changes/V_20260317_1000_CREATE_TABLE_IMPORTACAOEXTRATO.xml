@@ -5,14 +5,14 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
-    <changeSet id="create-table-importacaoextrato" author="lcano">
+    <changeSet id="create-table-arquivoextratoimportado" author="lcano">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="importacaoextrato"/>
+                <tableExists tableName="arquivoextratoimportado"/>
             </not>
         </preConditions>
 
-        <createTable tableName="importacaoextrato">
+        <createTable tableName="arquivoextratoimportado">
             <column name="id" type="${integer}" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" primaryKeyName="pkimportacaoextrato"/>
             </column>
@@ -34,10 +34,26 @@
             <column name="totallinhas" type="${integer}"/>
             <column name="linhasprocessadas" type="${integer}"/>
             <column name="linhasignoradas" type="${integer}"/>
-            <column name="linhaserro" type="${integer}"/>
             <column name="hasharquivo" type="${varchar_64}"/>
             <column name="nomearquivo" type="${varchar_255}"/>
+            <column name="datainicioperiodo" type="${date}"/>
+            <column name="datafimperiodo" type="${date}"/>
+            <column name="conteudoarquivo" type="${binary}"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="add-fk-lancamento-arquivoextratoimportado" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fklancamentoarquivoextrato"/>
+            </not>
+        </preConditions>
+
+        <addForeignKeyConstraint baseTableName="lancamento"
+                                 baseColumnNames="idarquivoextrato"
+                                 constraintName="fklancamentoarquivoextrato"
+                                 referencedTableName="arquivoextratoimportado"
+                                 referencedColumnNames="id"/>
     </changeSet>
 
 </databaseChangeLog>

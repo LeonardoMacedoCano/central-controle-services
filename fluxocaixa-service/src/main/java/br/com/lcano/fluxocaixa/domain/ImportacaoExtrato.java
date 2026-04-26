@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "importacaoextrato")
+@Table(name = "arquivoextratoimportado")
 public class ImportacaoExtrato {
 
     @Id
@@ -51,12 +51,20 @@ public class ImportacaoExtrato {
     @Column(name = "linhasignoradas")
     private Integer linhasIgnoradas;
 
-    @Column(name = "linhaserro")
-    private Integer linhasErro;
-
     @Column(name = "hasharquivo", nullable = false, length = 64)
     private String hashArquivo;
 
     @Column(name = "nomearquivo")
     private String nomeArquivo;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "datainicioperiodo")
+    private Date dataInicioPeriodo;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "datafimperiodo")
+    private Date dataFimPeriodo;
+
+    @Column(name = "conteudoarquivo", columnDefinition = "BYTEA")
+    private byte[] conteudoArquivo;
 }

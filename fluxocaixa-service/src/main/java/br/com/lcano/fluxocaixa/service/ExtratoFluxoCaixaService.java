@@ -9,8 +9,14 @@ import br.com.lcano.fluxocaixa.exception.ExtratoException;
 import br.com.lcano.fluxocaixa.exception.LancamentoException;
 import br.com.lcano.fluxocaixa.repository.ImportacaoExtratoRepository;
 import br.com.lcano.fluxocaixa.repository.ParametroRepository;
+import br.com.lcano.fluxocaixa.utils.GzipUtil;
 import br.com.lcano.fluxocaixa.utils.UsuarioUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,39 +36,25 @@ public class ExtratoFluxoCaixaService {
     public ImportacaoExtratoDTO importarContaCorrente(MultipartFile file) {
         Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
         validarParametro(idUsuario);
-        byte[] conteudo = lerBytes(file);
-        ImportacaoExtrato importacao = criarImportacao(conteudo, file.getOriginalFilename(), TipoImportacaoExtrato.CONTA_CORRENTE, idUsuario);
-        try {
-            asyncService.processarContaCorrente(importacao.getId(), conteudo);
-        } catch (Exception e) {
-            throw new LancamentoException.ErroIniciarImportacaoExtrato(e);
-        }
-        return new ImportacaoExtratoDTO().fromEntity(importacao);
+        return iniciarImportacao(file, TipoImportacaoExtrato.CONTA_CORRENTE, idUsuario, null);
     }
 
     public ImportacaoExtratoDTO importarFaturaCartao(MultipartFile file, Date dataVencimento) {
         Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
         validarParametro(idUsuario);
-        byte[] conteudo = lerBytes(file);
-        ImportacaoExtrato importacao = criarImportacao(conteudo, file.getOriginalFilename(), TipoImportacaoExtrato.FATURA_CARTAO, idUsuario);
-        try {
-            asyncService.processarFaturaCartao(importacao.getId(), conteudo, dataVencimento);
-        } catch (Exception e) {
-            throw new LancamentoException.ErroIniciarImportacaoExtrato(e);
-        }
-        return new ImportacaoExtratoDTO().fromEntity(importacao);
+        return iniciarImportacao(file, TipoImportacaoExtrato.FATURA_CARTAO, idUsuario, dataVencimento);
     }
 
     public ImportacaoExtratoDTO importarMovimentacaoB3(MultipartFile file) {
         Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
-        byte[] conteudo = lerBytes(file);
-        ImportacaoExtrato importacao = criarImportacao(conteudo, file.getOriginalFilename(), TipoImportacaoExtrato.MOVIMENTACAO_B3, idUsuario);
-        try {
-            asyncService.processarMovimentacaoB3(importacao.getId(), conteudo);
-        } catch (Exception e) {
-            throw new LancamentoException.ErroIniciarImportacaoExtrato(e);
-        }
-        return new ImportacaoExtratoDTO().fromEntity(importacao);
+        return iniciarImportacao(file, TipoImportacaoExtrato.MOVIMENTACAO_B3, idUsuario, null);
+    }
+
+    public Page<ImportacaoExtratoDTO> search(Pageable pageable) {
+        Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
+        return importacaoExtratoRepository
+                .findByIdUsuarioOrderByDataCriacaoDesc(idUsuario, pageable)
+                .map(e -> new ImportacaoExtratoDTO().fromEntity(e));
     }
 
     public ImportacaoExtratoDTO findStatusById(Long id) {
@@ -71,12 +63,37 @@ public class ExtratoFluxoCaixaService {
         return new ImportacaoExtratoDTO().fromEntity(importacao);
     }
 
-    private byte[] lerBytes(MultipartFile file) {
-        try {
-            return file.getBytes();
-        } catch (IOException e) {
-            throw new ExtratoException.ErroLeituraArquivo(e.getMessage());
+    public ResponseEntity<byte[]> downloadArquivo(Long id) {
+        Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
+        ImportacaoExtrato importacao = importacaoExtratoRepository.findById(id)
+                .orElseThrow(() -> new ExtratoException.ImportacaoNaoEncontrada(id));
+        if (!importacao.getIdUsuario().equals(idUsuario)) {
+            throw new ExtratoException.ImportacaoNaoEncontrada(id);
         }
+        if (importacao.getConteudoArquivo() == null) {
+            throw new ExtratoException.ArquivoSemConteudo();
+        }
+        byte[] conteudo = GzipUtil.decompress(importacao.getConteudoArquivo());
+        String nomeArquivo = importacao.getNomeArquivo() != null ? importacao.getNomeArquivo() : "extrato";
+        MediaType contentType = nomeArquivo.toLowerCase().endsWith(".xlsx")
+                ? MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                : MediaType.parseMediaType("text/csv");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nomeArquivo + "\"")
+                .contentType(contentType)
+                .body(conteudo);
+    }
+
+    private ImportacaoExtratoDTO iniciarImportacao(MultipartFile file, TipoImportacaoExtrato tipo,
+                                                    Long idUsuario, Date dataVencimento) {
+        byte[] conteudo = lerBytes(file);
+        ImportacaoExtrato importacao = criarImportacao(conteudo, file.getOriginalFilename(), tipo, idUsuario);
+        try {
+            asyncService.processar(importacao.getId(), conteudo, dataVencimento);
+        } catch (Exception e) {
+            throw new LancamentoException.ErroIniciarImportacaoExtrato(e);
+        }
+        return new ImportacaoExtratoDTO().fromEntity(importacao);
     }
 
     private ImportacaoExtrato criarImportacao(byte[] conteudo, String nomeArquivo, TipoImportacaoExtrato tipo, Long idUsuario) {
@@ -84,7 +101,7 @@ public class ExtratoFluxoCaixaService {
         importacaoExtratoRepository
                 .findByIdUsuarioAndHashArquivoAndStatus(idUsuario, hash, StatusImportacaoExtrato.CONCLUIDO)
                 .ifPresent(existente -> {
-                    throw new ExtratoException.ArquivoJaImportado(nomeArquivo);
+                    throw new ExtratoException.ArquivoJaImportado(existente);
                 });
 
         ImportacaoExtrato importacao = new ImportacaoExtrato();
@@ -94,6 +111,7 @@ public class ExtratoFluxoCaixaService {
         importacao.setDataCriacao(new Date());
         importacao.setHashArquivo(hash);
         importacao.setNomeArquivo(nomeArquivo);
+        importacao.setConteudoArquivo(GzipUtil.compress(conteudo));
         return importacaoExtratoRepository.save(importacao);
     }
 
@@ -101,6 +119,14 @@ public class ExtratoFluxoCaixaService {
         Parametro parametro = parametroRepository.findByIdUsuario(idUsuario);
         if (parametro == null) {
             throw new ExtratoException.ParametroNaoConfigurado();
+        }
+    }
+
+    private byte[] lerBytes(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new ExtratoException.ErroLeituraArquivo(e.getMessage());
         }
     }
 

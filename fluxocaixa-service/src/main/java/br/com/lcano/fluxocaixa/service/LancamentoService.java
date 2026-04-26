@@ -44,6 +44,7 @@ public class LancamentoService {
                                 .LancamentoTipoNaoSuportado(tipo.getDescricao()));
     }
 
+    @Transactional
     public LancamentoDTO findByIdAsDto(Long id) {
         return toDto(repository.findById(id)
                 .orElseThrow(() ->
@@ -68,6 +69,7 @@ public class LancamentoService {
         repository.deleteById(id);
     }
 
+    @Transactional
     public Page<LancamentoDTO> search(Pageable pageable, String filter) {
 
         Specification<Lancamento> spec = RsqlSpecUtil.fromFilter(filter);

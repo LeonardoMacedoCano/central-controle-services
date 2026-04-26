@@ -3,24 +3,23 @@ package br.com.lcano.fluxocaixa.service;
 import br.com.lcano.fluxocaixa.domain.ImportacaoExtrato;
 import br.com.lcano.fluxocaixa.domain.MapeamentoExtratoBancario;
 import br.com.lcano.fluxocaixa.domain.Parametro;
-import br.com.lcano.fluxocaixa.dto.ExtratoContaCorrenteDTO;
-import br.com.lcano.fluxocaixa.dto.ExtratoFaturaCartaoDTO;
-import br.com.lcano.fluxocaixa.dto.ExtratoMovimentacaoB3DTO;
+import br.com.lcano.fluxocaixa.dto.ExtratoImportacaoResultado;
 import br.com.lcano.fluxocaixa.enums.StatusImportacaoExtrato;
+import br.com.lcano.fluxocaixa.enums.TipoImportacaoExtrato;
 import br.com.lcano.fluxocaixa.repository.ImportacaoExtratoRepository;
 import br.com.lcano.fluxocaixa.repository.MapeamentoExtratoBancarioRepository;
 import br.com.lcano.fluxocaixa.repository.ParametroRepository;
-import br.com.lcano.fluxocaixa.utils.ExtratoContaCorrenteCSVParser;
-import br.com.lcano.fluxocaixa.utils.ExtratoFaturaCartaoCSVParser;
-import br.com.lcano.fluxocaixa.utils.ExtratoMovimentacaoB3XLSXParser;
 import br.com.lcano.fluxocaixa.utils.NotificacaoClient;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,78 +29,38 @@ public class ExtratoImportacaoAsyncService {
     private final ImportacaoExtratoRepository importacaoExtratoRepository;
     private final MapeamentoExtratoBancarioRepository mapeamentoExtratoBancarioRepository;
     private final ParametroRepository parametroRepository;
-    private final ExtratoLinhaProcessadorService linhaProcessador;
     private final NotificacaoClient notificacaoClient;
+    private final List<ExtratoImportacaoHandler> handlerList;
 
-    @Async
-    public void processarContaCorrente(Long importacaoId, byte[] conteudo) {
-        ImportacaoExtrato importacao = importacaoExtratoRepository.findById(importacaoId).orElse(null);
-        if (importacao == null) return;
+    private Map<TipoImportacaoExtrato, ExtratoImportacaoHandler> handlers;
 
-        iniciarProcessamento(importacao);
-
-        try {
-            List<ExtratoContaCorrenteDTO> itens = ExtratoContaCorrenteCSVParser.parse(conteudo);
-            importacao.setTotalLinhas(itens.size());
-            importacaoExtratoRepository.save(importacao);
-
-            Parametro parametro = parametroRepository.findByIdUsuario(importacao.getIdUsuario());
-            List<MapeamentoExtratoBancario> mapeamentos = mapeamentoExtratoBancarioRepository
-                    .findByIdUsuarioAndAtivoOrderByPrioridadeAsc(importacao.getIdUsuario(), true);
-
-            int[] resultado = linhaProcessador.processarBatchContaCorrente(itens, importacao.getIdUsuario(), mapeamentos, parametro);
-            concluirProcessamento(importacao, resultado[0], resultado[1]);
-            notificarSucesso(importacao, resultado[0], resultado[1]);
-        } catch (Exception e) {
-            log.error("Erro ao processar importação conta corrente id={}", importacaoId, e);
-            salvarErro(importacao, e.getMessage());
+    @PostConstruct
+    public void init() {
+        handlers = new EnumMap<>(TipoImportacaoExtrato.class);
+        for (ExtratoImportacaoHandler handler : handlerList) {
+            handlers.put(handler.getTipo(), handler);
         }
     }
 
     @Async
-    public void processarFaturaCartao(Long importacaoId, byte[] conteudo, Date dataVencimento) {
+    public void processar(Long importacaoId, byte[] conteudo, Date dataVencimento) {
         ImportacaoExtrato importacao = importacaoExtratoRepository.findById(importacaoId).orElse(null);
         if (importacao == null) return;
 
         iniciarProcessamento(importacao);
 
         try {
-            List<ExtratoFaturaCartaoDTO> itens = ExtratoFaturaCartaoCSVParser.parse(conteudo);
-            importacao.setTotalLinhas(itens.size());
-            importacaoExtratoRepository.save(importacao);
-
             Parametro parametro = parametroRepository.findByIdUsuario(importacao.getIdUsuario());
             List<MapeamentoExtratoBancario> mapeamentos = mapeamentoExtratoBancarioRepository
                     .findByIdUsuarioAndAtivoOrderByPrioridadeAsc(importacao.getIdUsuario(), true);
 
-            int[] resultado = linhaProcessador.processarBatchFaturaCartao(itens, importacao.getIdUsuario(), dataVencimento, parametro, mapeamentos);
-            concluirProcessamento(importacao, resultado[0], resultado[1]);
-            notificarSucesso(importacao, resultado[0], resultado[1]);
+            ExtratoImportacaoHandler handler = handlers.get(importacao.getTipo());
+            ExtratoImportacaoResultado resultado = handler.processar(conteudo, importacao, parametro, mapeamentos, dataVencimento);
+
+            concluirProcessamento(importacao, resultado);
+            notificarSucesso(importacao, resultado);
         } catch (Exception e) {
-            log.error("Erro ao processar importação fatura cartão id={}", importacaoId, e);
-            salvarErro(importacao, e.getMessage());
-        }
-    }
-
-    @Async
-    public void processarMovimentacaoB3(Long importacaoId, byte[] conteudo) {
-        ImportacaoExtrato importacao = importacaoExtratoRepository.findById(importacaoId).orElse(null);
-        if (importacao == null) return;
-
-        iniciarProcessamento(importacao);
-
-        try {
-            List<ExtratoMovimentacaoB3DTO> itens = ExtratoMovimentacaoB3XLSXParser.parse(conteudo);
-            importacao.setTotalLinhas(itens.size());
-            importacaoExtratoRepository.save(importacao);
-
-            Parametro parametro = parametroRepository.findByIdUsuario(importacao.getIdUsuario());
-
-            int[] resultado = linhaProcessador.processarBatchMovimentacaoB3(itens, importacao.getIdUsuario(), parametro);
-            concluirProcessamento(importacao, resultado[0], resultado[1]);
-            notificarSucesso(importacao, resultado[0], resultado[1]);
-        } catch (Exception e) {
-            log.error("Erro ao processar importação B3 id={}", importacaoId, e);
+            log.error("Erro ao processar importação id={}", importacaoId, e);
             salvarErro(importacao, e.getMessage());
         }
     }
@@ -112,12 +71,13 @@ public class ExtratoImportacaoAsyncService {
         importacaoExtratoRepository.save(importacao);
     }
 
-    private void concluirProcessamento(ImportacaoExtrato importacao, int processadas, int ignoradas) {
+    private void concluirProcessamento(ImportacaoExtrato importacao, ExtratoImportacaoResultado resultado) {
         importacao.setStatus(StatusImportacaoExtrato.CONCLUIDO);
         importacao.setDataConclusao(new Date());
-        importacao.setLinhasProcessadas(processadas);
-        importacao.setLinhasIgnoradas(ignoradas);
-        importacao.setLinhasErro(0);
+        importacao.setLinhasProcessadas(resultado.getProcessadas());
+        importacao.setLinhasIgnoradas(resultado.getIgnoradas());
+        importacao.setDataInicioPeriodo(resultado.getDataInicioPeriodo());
+        importacao.setDataFimPeriodo(resultado.getDataFimPeriodo());
         importacaoExtratoRepository.save(importacao);
     }
 
@@ -131,14 +91,14 @@ public class ExtratoImportacaoAsyncService {
         notificacaoClient.notificar(importacao.getIdUsuario(), "Importação falhou", mensagem, "ERRO");
     }
 
-    private void notificarSucesso(ImportacaoExtrato importacao, int processadas, int ignoradas) {
+    private void notificarSucesso(ImportacaoExtrato importacao, ExtratoImportacaoResultado resultado) {
         String tipoLabel = switch (importacao.getTipo()) {
             case CONTA_CORRENTE -> "Conta Corrente";
             case FATURA_CARTAO -> "Fatura Cartão";
             case MOVIMENTACAO_B3 -> "Movimentação B3";
         };
         String mensagem = String.format("%s (%s): %d lançamentos importados, %d ignorados.",
-                tipoLabel, importacao.getNomeArquivo(), processadas, ignoradas);
+                tipoLabel, importacao.getNomeArquivo(), resultado.getProcessadas(), resultado.getIgnoradas());
         notificacaoClient.notificar(importacao.getIdUsuario(), "Importação concluída", mensagem, "SUCESSO");
     }
 }

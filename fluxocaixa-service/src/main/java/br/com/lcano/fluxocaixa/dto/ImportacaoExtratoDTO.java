@@ -20,7 +20,9 @@ public class ImportacaoExtratoDTO {
     private Integer totalLinhas;
     private Integer linhasProcessadas;
     private Integer linhasIgnoradas;
-    private Integer linhasErro;
+    private String nomeArquivo;
+    private Date dataInicioPeriodo;
+    private Date dataFimPeriodo;
 
     public ImportacaoExtratoDTO fromEntity(ImportacaoExtrato entity) {
         ImportacaoExtratoDTO dto = new ImportacaoExtratoDTO();
@@ -34,7 +36,9 @@ public class ImportacaoExtratoDTO {
         dto.setTotalLinhas(entity.getTotalLinhas());
         dto.setLinhasProcessadas(entity.getLinhasProcessadas());
         dto.setLinhasIgnoradas(entity.getLinhasIgnoradas());
-        dto.setLinhasErro(entity.getLinhasErro());
+        dto.setNomeArquivo(entity.getNomeArquivo());
+        dto.setDataInicioPeriodo(entity.getDataInicioPeriodo());
+        dto.setDataFimPeriodo(entity.getDataFimPeriodo());
         return dto;
     }
 }

@@ -62,4 +62,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleArquivoJaImportado(ExtratoException.ArquivoJaImportado ex) {
         return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
+
+    @ExceptionHandler(ExtratoException.ArquivoSemConteudo.class)
+    protected ResponseEntity<Object> handleArquivoSemConteudo(ExtratoException.ArquivoSemConteudo ex) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }

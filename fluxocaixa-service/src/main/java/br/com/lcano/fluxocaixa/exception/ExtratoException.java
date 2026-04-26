@@ -1,5 +1,9 @@
 package br.com.lcano.fluxocaixa.exception;
 
+import br.com.lcano.fluxocaixa.domain.ImportacaoExtrato;
+
+import java.text.SimpleDateFormat;
+
 public class ExtratoException extends RuntimeException {
 
     public ExtratoException(String message) {
@@ -25,8 +29,20 @@ public class ExtratoException extends RuntimeException {
     }
 
     public static class ArquivoJaImportado extends ExtratoException {
-        public ArquivoJaImportado(String nomeArquivo) {
-            super(String.format("O arquivo '%s' já foi importado anteriormente.", nomeArquivo));
+        public ArquivoJaImportado(ImportacaoExtrato existente) {
+            super(String.format(
+                    "O arquivo '%s' já foi importado em %s — %d de %d linhas processadas.",
+                    existente.getNomeArquivo(),
+                    new SimpleDateFormat("dd/MM/yyyy 'às' HH:mm").format(existente.getDataConclusao()),
+                    existente.getLinhasProcessadas() != null ? existente.getLinhasProcessadas() : 0,
+                    existente.getTotalLinhas() != null ? existente.getTotalLinhas() : 0
+            ));
+        }
+    }
+
+    public static class ArquivoSemConteudo extends ExtratoException {
+        public ArquivoSemConteudo() {
+            super("Conteúdo do arquivo não disponível para esta importação.");
         }
     }
 
