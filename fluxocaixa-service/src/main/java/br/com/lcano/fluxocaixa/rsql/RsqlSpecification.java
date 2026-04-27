@@ -23,7 +23,7 @@ public class RsqlSpecification<T> implements Specification<T> {
             @Nonnull CriteriaBuilder builder
     ) {
 
-        Path<?> path = root.get(criteria.getProperty());
+        Path<?> path = resolvePath(root, criteria.getProperty());
         Class<?> fieldType = path.getJavaType();
 
         String rawValue = criteria.getValues().getFirst();
@@ -54,6 +54,15 @@ public class RsqlSpecification<T> implements Specification<T> {
                     "%" + rawValue.toLowerCase(Locale.ROOT) + "%"
             );
         };
+    }
+
+    private Path<?> resolvePath(Root<T> root, String property) {
+        String[] parts = property.split("\\.");
+        Path<?> path = root.get(parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            path = path.get(parts[i]);
+        }
+        return path;
     }
 
     private Object convertValue(String value, Class<?> fieldType) {

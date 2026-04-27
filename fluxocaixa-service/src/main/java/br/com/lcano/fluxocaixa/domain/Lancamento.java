@@ -51,7 +51,4 @@ public class Lancamento implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idarquivoextrato")
     private ImportacaoExtrato importacao;
-
-    @Column(name = "idarquivoextrato", insertable = false, updatable = false)
-    private Long idArquivoExtrato;
 }

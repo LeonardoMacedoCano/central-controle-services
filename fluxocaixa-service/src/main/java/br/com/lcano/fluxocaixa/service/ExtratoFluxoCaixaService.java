@@ -3,17 +3,22 @@ package br.com.lcano.fluxocaixa.service;
 import br.com.lcano.fluxocaixa.domain.ImportacaoExtrato;
 import br.com.lcano.fluxocaixa.domain.Parametro;
 import br.com.lcano.fluxocaixa.dto.ImportacaoExtratoDTO;
+import br.com.lcano.fluxocaixa.dto.LancamentoDTO;
 import br.com.lcano.fluxocaixa.enums.StatusImportacaoExtrato;
 import br.com.lcano.fluxocaixa.enums.TipoImportacaoExtrato;
 import br.com.lcano.fluxocaixa.exception.ExtratoException;
 import br.com.lcano.fluxocaixa.exception.LancamentoException;
 import br.com.lcano.fluxocaixa.repository.ImportacaoExtratoRepository;
 import br.com.lcano.fluxocaixa.repository.ParametroRepository;
+import br.com.lcano.fluxocaixa.rsql.RsqlSpecUtil;
 import br.com.lcano.fluxocaixa.utils.GzipUtil;
 import br.com.lcano.fluxocaixa.utils.UsuarioUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +37,7 @@ public class ExtratoFluxoCaixaService {
     private final ImportacaoExtratoRepository importacaoExtratoRepository;
     private final ParametroRepository parametroRepository;
     private final ExtratoImportacaoAsyncService asyncService;
+    private final LancamentoService lancamentoService;
 
     public ImportacaoExtratoDTO importarContaCorrente(MultipartFile file) {
         Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
@@ -50,11 +56,44 @@ public class ExtratoFluxoCaixaService {
         return iniciarImportacao(file, TipoImportacaoExtrato.MOVIMENTACAO_B3, idUsuario, null);
     }
 
-    public Page<ImportacaoExtratoDTO> search(Pageable pageable) {
+    public Page<ImportacaoExtratoDTO> search(Pageable pageable, String filter) {
         Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
-        return importacaoExtratoRepository
-                .findByIdUsuarioOrderByDataCriacaoDesc(idUsuario, pageable)
+        String idUsuarioFilter = "idUsuario==" + idUsuario;
+        String fullFilter = (filter != null && !filter.isBlank())
+                ? idUsuarioFilter + ";" + filter
+                : idUsuarioFilter;
+        Specification<ImportacaoExtrato> spec = RsqlSpecUtil.fromFilter(fullFilter);
+        Pageable sorted = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by("dataCriacao").descending()
+        );
+        return importacaoExtratoRepository.findAll(spec, sorted)
                 .map(e -> new ImportacaoExtratoDTO().fromEntity(e));
+    }
+
+    public ImportacaoExtratoDTO findById(Long id) {
+        Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
+        ImportacaoExtrato arquivo = importacaoExtratoRepository.findById(id)
+                .orElseThrow(() -> new ExtratoException.ImportacaoNaoEncontrada(id));
+        if (!arquivo.getIdUsuario().equals(idUsuario)) {
+            throw new ExtratoException.ImportacaoNaoEncontrada(id);
+        }
+        return new ImportacaoExtratoDTO().fromEntity(arquivo);
+    }
+
+    public Page<LancamentoDTO> searchLancamentos(Long id, String filter, Pageable pageable) {
+        Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
+        ImportacaoExtrato arquivo = importacaoExtratoRepository.findById(id)
+                .orElseThrow(() -> new ExtratoException.ImportacaoNaoEncontrada(id));
+        if (!arquivo.getIdUsuario().equals(idUsuario)) {
+            throw new ExtratoException.ImportacaoNaoEncontrada(id);
+        }
+        String baseFilter = "importacao.id==" + id;
+        String fullFilter = (filter != null && !filter.isBlank())
+                ? baseFilter + ";" + filter
+                : baseFilter;
+        return lancamentoService.search(pageable, fullFilter);
     }
 
     public ImportacaoExtratoDTO findStatusById(Long id) {

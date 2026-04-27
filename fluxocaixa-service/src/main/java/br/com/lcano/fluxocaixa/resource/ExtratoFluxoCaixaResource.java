@@ -1,6 +1,7 @@
 package br.com.lcano.fluxocaixa.resource;
 
 import br.com.lcano.fluxocaixa.dto.ImportacaoExtratoDTO;
+import br.com.lcano.fluxocaixa.dto.LancamentoDTO;
 import br.com.lcano.fluxocaixa.service.ExtratoFluxoCaixaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,8 +43,23 @@ public class ExtratoFluxoCaixaResource {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ImportacaoExtratoDTO>> search(Pageable pageable) {
-        return ResponseEntity.ok(service.search(pageable));
+    public ResponseEntity<Page<ImportacaoExtratoDTO>> search(
+            @RequestParam(value = "filter", required = false) String filter,
+            Pageable pageable) {
+        return ResponseEntity.ok(service.search(pageable, filter));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ImportacaoExtratoDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @GetMapping("/{id}/lancamentos/search")
+    public ResponseEntity<Page<LancamentoDTO>> searchLancamentos(
+            @PathVariable Long id,
+            @RequestParam(value = "filter", required = false) String filter,
+            Pageable pageable) {
+        return ResponseEntity.ok(service.searchLancamentos(id, filter, pageable));
     }
 
     @GetMapping("/{id}/arquivo")
