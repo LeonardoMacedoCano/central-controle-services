@@ -3,7 +3,6 @@ package br.com.lcano.usuario.exception;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -24,14 +23,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, MSG_ERRO_GENERICO + ex.getMessage());
     }
 
-    @ExceptionHandler({BadCredentialsException.class, JWTVerificationException.class, UsuarioException.CredenciaisInvalidas.class})
-    protected ResponseEntity<Object> handleInvalidCredentials(Exception ex) {
-        return buildResponseEntity(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.");
+    @ExceptionHandler({JWTVerificationException.class, UsuarioException.GoogleTokenInvalido.class})
+    protected ResponseEntity<Object> handleGoogleTokenInvalido(Exception ex) {
+        return buildResponseEntity(HttpStatus.UNAUTHORIZED, "Não foi possível validar o login com o Google.");
     }
 
-    @ExceptionHandler(UsuarioException.UsuarioJaCadastrado.class)
-    protected ResponseEntity<Object> handleUsuarioJaCadastrado(UsuarioException.UsuarioJaCadastrado ex) {
-        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    @ExceptionHandler(UsuarioException.EmailNaoAutorizado.class)
+    protected ResponseEntity<Object> handleEmailNaoAutorizado(UsuarioException.EmailNaoAutorizado ex) {
+        return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(UsuarioException.UsuarioNaoEncontrado.class)
@@ -47,11 +46,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UsuarioException.ErroGerarToken.class)
     protected ResponseEntity<Object> handleErroGerarToken(UsuarioException.ErroGerarToken ex) {
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
-    }
-
-    @ExceptionHandler(UsuarioException.SenhaAtualIncorreta.class)
-    protected ResponseEntity<Object> handleSenhaAtualIncorreta(UsuarioException.SenhaAtualIncorreta ex) {
-        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(TemaException.TemaNaoEncontrado.class)
