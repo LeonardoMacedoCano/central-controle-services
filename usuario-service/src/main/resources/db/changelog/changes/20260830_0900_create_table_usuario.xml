@@ -19,8 +19,11 @@
             <column name="username" type="${varchar_255}">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="senha" type="${varchar_255}">
-                <constraints nullable="false"/>
+            <column name="googlesub" type="${varchar_255}">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="${varchar_255}">
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="datainclusao" type="${date}">
                 <constraints nullable="false"/>

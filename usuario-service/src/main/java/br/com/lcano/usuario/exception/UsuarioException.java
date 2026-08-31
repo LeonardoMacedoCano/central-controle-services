@@ -12,18 +12,6 @@ public abstract class UsuarioException extends RuntimeException {
         }
     }
 
-    public static class UsuarioJaCadastrado extends UsuarioException {
-        public UsuarioJaCadastrado() {
-            super("Usuário já cadastrado.");
-        }
-    }
-
-    public static class CredenciaisInvalidas extends UsuarioException {
-        public CredenciaisInvalidas() {
-            super("Credenciais inválidas.");
-        }
-    }
-
     public static class UsuarioDesativado extends UsuarioException {
         public UsuarioDesativado() {
             super("Usuário desativado.");
@@ -42,9 +30,15 @@ public abstract class UsuarioException extends RuntimeException {
         }
     }
 
-    public static class SenhaAtualIncorreta extends UsuarioException {
-        public SenhaAtualIncorreta() {
-            super("A senha atual fornecida está incorreta. Verifique e tente novamente.");
+    public static class GoogleTokenInvalido extends UsuarioException {
+        public GoogleTokenInvalido() {
+            super("Não foi possível validar o login com o Google.");
+        }
+    }
+
+    public static class EmailNaoAutorizado extends UsuarioException {
+        public EmailNaoAutorizado() {
+            super("E-mail não autorizado a acessar o sistema.");
         }
     }
 }

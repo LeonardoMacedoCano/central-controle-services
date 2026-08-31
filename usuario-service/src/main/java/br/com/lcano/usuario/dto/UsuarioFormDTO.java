@@ -12,8 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class UsuarioFormDTO {
     private String username;
-    private String currentPassword;
-    private String newPassword;
     private Long idTema;
     private MultipartFile file;
 }

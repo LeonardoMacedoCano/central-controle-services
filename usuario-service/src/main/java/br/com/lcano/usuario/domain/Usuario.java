@@ -39,8 +39,11 @@ public class Usuario implements UserDetails {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
-    private String senha;
+    @Column(name = "googlesub", nullable = false, unique = true)
+    private String googleSub;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(name = "datainclusao", nullable = false)
     private Date dataInclusao;
@@ -56,9 +59,10 @@ public class Usuario implements UserDetails {
     @Column(name = "icone")
     private byte[] icone;
 
-    public Usuario(String username, String senha, Date dataInclusao) {
-        this.username = username;
-        this.senha = senha;
+    public Usuario(String googleSub, String email, Date dataInclusao) {
+        this.googleSub = googleSub;
+        this.email = email;
+        this.username = email;
         this.dataInclusao = dataInclusao;
         this.ativo = true;
     }
@@ -70,7 +74,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getPassword() {
-        return senha;
+        return null;
     }
 
     @Override
