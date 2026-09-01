@@ -19,6 +19,7 @@ public class MapeamentoExtratoBancarioService {
 
     public MapeamentoExtratoBancarioDTO findByIdAsDto(Long id) {
         return repository.findById(id)
+                .filter(this::pertenceAoUsuarioAtual)
                 .map(entity -> new MapeamentoExtratoBancarioDTO().fromEntity(entity))
                 .orElseThrow(() -> new MapeamentoExtratoBancarioException.MapeamentoNaoEncontrado(id));
     }
@@ -37,7 +38,15 @@ public class MapeamentoExtratoBancarioService {
     }
 
     public void delete(Long id) {
-        repository.deleteById(id);
+        MapeamentoExtratoBancario entity = repository.findById(id)
+                .filter(this::pertenceAoUsuarioAtual)
+                .orElseThrow(() -> new MapeamentoExtratoBancarioException.MapeamentoNaoEncontrado(id));
+        repository.delete(entity);
+    }
+
+    private boolean pertenceAoUsuarioAtual(MapeamentoExtratoBancario entity) {
+        return entity.getIdUsuario() != null
+                && entity.getIdUsuario().equals(UsuarioUtil.getIdUsuarioAutenticado());
     }
 
     private String buildUserFilter(String filter) {

@@ -33,6 +33,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler({LancamentoException.ItemLancamentoNaoEncontrado.class})
+    protected ResponseEntity<Object> handleItemLancamentoNaoEncontrado(LancamentoException.ItemLancamentoNaoEncontrado ex) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
     @ExceptionHandler({LancamentoException.LancamentoTipoNaoSuportado.class})
     protected ResponseEntity<Object> handleLancamentoTipoNaoSuportado(LancamentoException.LancamentoTipoNaoSuportado ex) {
         return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
