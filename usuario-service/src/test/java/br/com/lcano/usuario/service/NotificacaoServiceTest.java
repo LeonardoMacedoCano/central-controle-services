@@ -48,6 +48,19 @@ class NotificacaoServiceTest {
     }
 
     @Test
+    void receiveInterna_secretNulo_lanca() {
+        assertThatThrownBy(() -> service.receiveInterna(null, dto()))
+                .isInstanceOf(NotificacaoException.SecretInvalido.class);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void receiveInterna_secretDeTamanhoDiferente_lanca() {
+        assertThatThrownBy(() -> service.receiveInterna(SECRET + "x", dto()))
+                .isInstanceOf(NotificacaoException.SecretInvalido.class);
+    }
+
+    @Test
     void receiveInterna_secretValido_salvaNaoLidaComData() {
         service.receiveInterna(SECRET, dto());
 

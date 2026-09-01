@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Date;
 
 @Service
@@ -23,7 +25,7 @@ public class NotificacaoService {
     private String serviceSecret;
 
     public void receiveInterna(String secret, NotificacaoInternaDTO dto) {
-        if (!serviceSecret.equals(secret)) {
+        if (!secretsConferem(serviceSecret, secret)) {
             throw new NotificacaoException.SecretInvalido();
         }
         Notificacao notificacao = new Notificacao();
@@ -74,5 +76,14 @@ public class NotificacaoService {
         var notificacoes = repository.findByIdUsuarioAndLida(idUsuario, false);
         notificacoes.forEach(n -> n.setLida(true));
         repository.saveAll(notificacoes);
+    }
+
+    private static boolean secretsConferem(String esperado, String recebido) {
+        if (esperado == null || recebido == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                esperado.getBytes(StandardCharsets.UTF_8),
+                recebido.getBytes(StandardCharsets.UTF_8));
     }
 }
