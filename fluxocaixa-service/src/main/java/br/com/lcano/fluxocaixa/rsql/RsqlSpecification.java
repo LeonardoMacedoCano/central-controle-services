@@ -4,8 +4,11 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.Locale;
 
 public class RsqlSpecification<T> implements Specification<T> {
@@ -65,14 +68,22 @@ public class RsqlSpecification<T> implements Specification<T> {
         return path;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Object convertValue(String value, Class<?> fieldType) {
         if (fieldType == Boolean.class || fieldType == boolean.class) {
             return Boolean.valueOf(value);
         }
 
         if (fieldType == Timestamp.class) {
-            LocalDate date = LocalDate.parse(value);
-            return Timestamp.valueOf(date.atStartOfDay());
+            return Timestamp.valueOf(parseData(value).atStartOfDay());
+        }
+
+        if (fieldType == Date.class) {
+            return Timestamp.valueOf(parseData(value).atStartOfDay());
+        }
+
+        if (fieldType == LocalDate.class) {
+            return parseData(value);
         }
 
         if (fieldType == Long.class || fieldType == long.class) {
@@ -83,7 +94,29 @@ public class RsqlSpecification<T> implements Specification<T> {
             return Integer.valueOf(value);
         }
 
+        if (fieldType == BigDecimal.class) {
+            return new BigDecimal(value);
+        }
+
+        if (fieldType == Double.class || fieldType == double.class) {
+            return Double.valueOf(value);
+        }
+
+        if (fieldType.isEnum()) {
+            return Enum.valueOf((Class<? extends Enum>) fieldType, value);
+        }
+
         return value;
+    }
+
+    private LocalDate parseData(String value) {
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            return java.time.Instant.ofEpochMilli(Long.parseLong(value))
+                    .atZone(java.time.ZoneOffset.UTC)
+                    .toLocalDate();
+        }
     }
 
     @SuppressWarnings("unchecked")
