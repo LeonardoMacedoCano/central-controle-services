@@ -9,6 +9,9 @@ import br.com.lcano.fluxocaixa.exception.ExtratoException;
 import br.com.lcano.fluxocaixa.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,10 +20,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Service
 @RequiredArgsConstructor
 public class ExtratoLinhaProcessadorService {
+
+    private static final Logger log = LoggerFactory.getLogger(ExtratoLinhaProcessadorService.class);
+
+    @Value("${spring.jackson.time-zone:GMT}")
+    private String timeZone;
 
     private final LancamentoRepository lancamentoRepository;
     private final DespesaRepository despesaRepository;
@@ -60,6 +69,8 @@ public class ExtratoLinhaProcessadorService {
                         return salvarDespesa(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
                                 valor.abs(), item.getDataLancamento(), cat, DespesaFormaPagamento.CARTAO_DEBITO, idImportacao);
                     }
+                    log.warn("Regra CLASSIFICAR_DESPESA '{}' casou a linha '{}' mas o valor {} nao e debito; "
+                            + "linha seguira para a classificacao padrao.", mapeamento.getDescricaoMatch(), descricao, valor);
                 }
                 case CLASSIFICAR_RENDA -> {
                     if (valor.compareTo(BigDecimal.ZERO) > 0) {
@@ -71,6 +82,8 @@ public class ExtratoLinhaProcessadorService {
                         return salvarRenda(idUsuario, item.getDataLancamento(), desc, descricaoOrigem,
                                 valor, item.getDataLancamento(), cat, idImportacao);
                     }
+                    log.warn("Regra CLASSIFICAR_RENDA '{}' casou a linha '{}' mas o valor {} nao e credito; "
+                            + "linha seguira para a classificacao padrao.", mapeamento.getDescricaoMatch(), descricao, valor);
                 }
                 case CLASSIFICAR_ATIVO -> {
                     MovimentacaoCategoria cat = resolverCategoria(
@@ -136,7 +149,7 @@ public class ExtratoLinhaProcessadorService {
 
         if (categoria == null) {
             if (item.getCategoria() != null) {
-                categoria = findOrCreateCategoriaDespesa(capitalize(item.getCategoria()));
+                categoria = findOrCreateCategoriaDespesa(idUsuario, capitalize(item.getCategoria()));
             } else {
                 categoria = resolverCategoria(null,
                         parametro != null ? parametro.getDespesaCategoriaPadrao() : null, "despesa");
@@ -316,11 +329,12 @@ public class ExtratoLinhaProcessadorService {
                 "Nenhuma categoria de " + tipo + " configurada. Configure os parâmetros do usuário.");
     }
 
-    private MovimentacaoCategoria findOrCreateCategoriaDespesa(String descricao) {
+    private MovimentacaoCategoria findOrCreateCategoriaDespesa(Long idUsuario, String descricao) {
         return movimentacaoCategoriaRepository
-                .findByDescricaoIgnoreCaseAndTipo(descricao, TipoCategoria.DESPESA)
+                .findVisivelByDescricaoAndTipo(idUsuario, descricao, TipoCategoria.DESPESA)
                 .orElseGet(() -> {
                     MovimentacaoCategoria nova = new MovimentacaoCategoria();
+                    nova.setIdUsuario(idUsuario);
                     nova.setDescricao(descricao);
                     nova.setTipo(TipoCategoria.DESPESA);
                     return movimentacaoCategoriaRepository.save(nova);
@@ -363,7 +377,7 @@ public class ExtratoLinhaProcessadorService {
         String descOrigemAnterior = parcelamento[0]
                 + " - Parcela " + (parcelaAtual - 1) + "/" + parcelamento[2];
 
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
         cal.setTime(dataVencimentoAtual);
         cal.set(Calendar.DAY_OF_MONTH, 1);
         Date fimMesAnterior = cal.getTime();

@@ -30,6 +30,10 @@ public class MovimentacaoCategoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Nulo = categoria de sistema (visivel a todos); preenchido = categoria do usuario. */
+    @Column(name = "idusuario")
+    private Long idUsuario;
+
     @Column(nullable = false)
     private String descricao;
 
