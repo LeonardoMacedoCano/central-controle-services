@@ -27,7 +27,7 @@ public class SecurityConfigurations {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/auth/validateToken").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/validateToken").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tema/default").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/notificacao/interna").permitAll()
                         .anyRequest().authenticated()
