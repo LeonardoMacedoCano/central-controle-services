@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,20 +34,33 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         String token = getToken(request);
         if (token != null) {
-            Long idUser = tokenService.validateToken(token);
-            UserDetails usuario = usuarioRepository.findById(idUser).orElseThrow(UsuarioException.UsuarioNaoEncontrado::new);
+            try {
+                Long idUser = tokenService.validateToken(token);
+                UserDetails usuario = usuarioRepository.findById(idUser)
+                        .orElseThrow(UsuarioException.UsuarioNaoEncontrado::new);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (UsuarioException.TokenExpiradoOuInvalido | UsuarioException.UsuarioNaoEncontrado e) {
+                unauthorized(response, e.getMessage());
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);
     }
 
+    private void unauthorized(HttpServletResponse response, String mensagem) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"error\":\"" + mensagem + "\"}");
+    }
+
     private String getToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
+        return authHeader.substring("Bearer ".length()).trim();
     }
 }
