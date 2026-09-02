@@ -9,10 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Devolve {@code 401} com corpo {@code {"error": ...}} para requisição sem
- * autenticação, no mesmo formato do resto da API (em vez do 403 padrão do Spring).
- */
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

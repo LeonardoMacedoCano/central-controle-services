@@ -12,8 +12,6 @@
             </not>
         </preConditions>
 
-        <!-- idusuario nulo = categoria de sistema (visivel a todos os usuarios);
-             idusuario preenchido = categoria criada por aquele usuario. -->
         <addColumn tableName="movimentacaocategoria">
             <column name="idusuario" type="${integer}"/>
         </addColumn>

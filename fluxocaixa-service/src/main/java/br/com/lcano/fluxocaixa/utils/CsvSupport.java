@@ -3,21 +3,11 @@ package br.com.lcano.fluxocaixa.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Apoio para leitura de CSV de extrato: detecção conservadora de delimitador e
- * quebra de linha respeitando campos entre aspas duplas ({@code "campo, com vírgula"},
- * {@code ""} como aspas escapada).
- */
 public final class CsvSupport {
 
     private CsvSupport() {
     }
 
-    /**
-     * Escolhe o delimitador a partir da linha de cabeçalho. Só sai do padrão
-     * {@code ','} quando ele não aparece: assim um arquivo separado por vírgula
-     * nunca é reinterpretado.
-     */
     public static char detectarDelimitador(String header) {
         if (header == null) {
             return ',';

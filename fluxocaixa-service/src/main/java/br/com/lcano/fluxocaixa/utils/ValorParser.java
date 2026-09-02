@@ -2,18 +2,6 @@ package br.com.lcano.fluxocaixa.utils;
 
 import java.math.BigDecimal;
 
-/**
- * Converte valores monetários textuais para {@link BigDecimal}, aceitando os
- * formatos que aparecem em extratos brasileiros e exportações en-US:
- * {@code "1234.56"}, {@code "1234,56"}, {@code "1.234,56"}, {@code "-1.234,56"},
- * {@code "R$ 1.234,56"}, {@code "1,234.56"}, {@code "(1.234,56)"} (negativo entre
- * parênteses).
- *
- * <p>Regra do separador decimal: quando há vírgula e ponto, o que aparecer por
- * último é o decimal e o outro é separador de milhar; quando há só vírgula, ela
- * é o decimal; quando há só ponto (ou nenhum separador), o texto já está no
- * formato aceito por {@link BigDecimal}.
- */
 public final class ValorParser {
 
     private ValorParser() {

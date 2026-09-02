@@ -15,7 +15,6 @@ class CsvSupportTest {
     @Test
     void usaPontoEVirgulaApenasQuandoNaoHaVirgula() {
         assertThat(CsvSupport.detectarDelimitador("data;valor;saldo;descricao")).isEqualTo(';');
-        // se houver qualquer virgula, mantem a virgula (nunca reinterpreta um arquivo separado por virgula)
         assertThat(CsvSupport.detectarDelimitador("data;valor,com virgula;descricao")).isEqualTo(',');
     }
 

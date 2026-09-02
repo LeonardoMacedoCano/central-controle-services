@@ -18,11 +18,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-/**
- * Garante que o RSQL converte o argumento textual para o tipo Java do campo
- * antes de montar o predicado. Sem isso, filtros por data (campo java.util.Date,
- * usado por Lancamento.dataLancamento) chegavam ao banco como String -> 500.
- */
 @SuppressWarnings({"unchecked", "rawtypes"})
 class RsqlSpecificationConvertValueTest {
 

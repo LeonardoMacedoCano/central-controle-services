@@ -100,7 +100,6 @@ public class ExtratoMovimentacaoB3XLSXParser {
         return type == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell);
     }
 
-    /** Aceita 0 quando a celula esta vazia (quantidade/preco unitario podem faltar). */
     private static BigDecimal getCellNumerico(Row row, int index) {
         Cell cell = row.getCell(index, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) {
@@ -110,7 +109,6 @@ public class ExtratoMovimentacaoB3XLSXParser {
         return valor != null ? valor : BigDecimal.ZERO;
     }
 
-    /** Rejeita a linha (lanca) quando o valor total nao pode ser lido, em vez de importar como zero. */
     private static BigDecimal getCellNumericoObrigatorio(Row row, int index) {
         Cell cell = row.getCell(index, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         BigDecimal valor = cell == null ? null : lerNumero(cell);
