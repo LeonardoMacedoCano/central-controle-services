@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="alter-table-movimentacaocategoria-add-idusuario" author="lcano">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="movimentacaocategoria" columnName="idusuario"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="movimentacaocategoria">
+            <column name="idusuario" type="${integer}"/>
+        </addColumn>
+
+        <dropUniqueConstraint
+                tableName="movimentacaocategoria"
+                constraintName="uk_movimentacaocategoria_descricao_tipo"/>
+
+        <addUniqueConstraint
+                tableName="movimentacaocategoria"
+                columnNames="idusuario, descricao, tipo"
+                constraintName="uk_movimentacaocategoria_usuario_descricao_tipo"/>
+    </changeSet>
+
+</databaseChangeLog>

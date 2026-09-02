@@ -97,8 +97,12 @@ public class ExtratoFluxoCaixaService {
     }
 
     public ImportacaoExtratoDTO findStatusById(Long id) {
+        Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
         ImportacaoExtrato importacao = importacaoExtratoRepository.findById(id)
                 .orElseThrow(() -> new ExtratoException.ImportacaoNaoEncontrada(id));
+        if (!importacao.getIdUsuario().equals(idUsuario)) {
+            throw new ExtratoException.ImportacaoNaoEncontrada(id);
+        }
         return new ImportacaoExtratoDTO().fromEntity(importacao);
     }
 

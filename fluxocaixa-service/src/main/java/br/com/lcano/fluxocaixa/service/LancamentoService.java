@@ -46,9 +46,10 @@ public class LancamentoService {
 
     @Transactional
     public LancamentoDTO findByIdAsDto(Long id) {
-        return toDto(repository.findById(id)
-                .orElseThrow(() ->
-                        new LancamentoException.LancamentoNaoEncontradoById(id)));
+        Lancamento entity = repository.findById(id)
+                .filter(this::pertenceAoUsuarioAtual)
+                .orElseThrow(() -> new LancamentoException.LancamentoNaoEncontradoById(id));
+        return toDto(entity);
     }
 
     @Transactional
@@ -65,14 +66,18 @@ public class LancamentoService {
         return new LancamentoDTO().fromEntity(entity);
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        repository.deleteById(id);
+        Lancamento entity = repository.findById(id)
+                .filter(this::pertenceAoUsuarioAtual)
+                .orElseThrow(() -> new LancamentoException.LancamentoNaoEncontradoById(id));
+        repository.delete(entity);
     }
 
     @Transactional
     public Page<LancamentoDTO> search(Pageable pageable, String filter) {
 
-        Specification<Lancamento> spec = RsqlSpecUtil.fromFilter(filter);
+        Specification<Lancamento> spec = RsqlSpecUtil.fromFilter(comFiltroDoUsuario(filter));
 
         Pageable sorted = PageRequest.of(
                 pageable.getPageNumber(),
@@ -82,6 +87,18 @@ public class LancamentoService {
 
         return repository.findAll(spec, sorted)
                 .map(this::toDto);
+    }
+
+    private boolean pertenceAoUsuarioAtual(Lancamento entity) {
+        return entity.getIdUsuario() != null
+                && entity.getIdUsuario().equals(UsuarioUtil.getIdUsuarioAutenticado());
+    }
+
+    private String comFiltroDoUsuario(String filter) {
+        String userFilter = "idUsuario==" + UsuarioUtil.getIdUsuarioAutenticado();
+        return (filter == null || filter.isBlank())
+                ? userFilter
+                : userFilter + ";" + filter;
     }
 
     private LancamentoDTO toDto(Lancamento entity) {

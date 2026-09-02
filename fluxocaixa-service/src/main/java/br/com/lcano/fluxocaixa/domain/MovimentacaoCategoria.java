@@ -30,6 +30,9 @@ public class MovimentacaoCategoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "idusuario")
+    private Long idUsuario;
+
     @Column(nullable = false)
     private String descricao;
 

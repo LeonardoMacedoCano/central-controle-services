@@ -5,6 +5,7 @@ import br.com.lcano.fluxocaixa.domain.Lancamento;
 import br.com.lcano.fluxocaixa.dto.RendaDTO;
 import br.com.lcano.fluxocaixa.dto.LancamentoItemDTO;
 import br.com.lcano.fluxocaixa.enums.TipoLancamento;
+import br.com.lcano.fluxocaixa.exception.LancamentoException;
 import br.com.lcano.fluxocaixa.repository.RendaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class RendaService implements LancamentoItemService {
     public LancamentoItemDTO findByLancamentoId(Long id) {
         Renda entity = repository.findByLancamentoId(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Renda não encontrada"));
+                        new LancamentoException.ItemLancamentoNaoEncontrado("Renda", id));
 
         return (LancamentoItemDTO) new RendaDTO().fromEntity(entity);
     }

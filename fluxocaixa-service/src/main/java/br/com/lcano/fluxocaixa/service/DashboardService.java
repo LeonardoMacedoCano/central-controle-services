@@ -9,6 +9,7 @@ import br.com.lcano.fluxocaixa.repository.DespesaRepository;
 import br.com.lcano.fluxocaixa.repository.RendaRepository;
 import br.com.lcano.fluxocaixa.utils.UsuarioUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +27,9 @@ public class DashboardService {
     private final DespesaRepository despesaRepository;
     private final RendaRepository rendaRepository;
     private final AtivoRepository ativoRepository;
+
+    @Value("${spring.jackson.time-zone:GMT}")
+    private String timeZone;
 
     public DashboardDTO findResumo(int ano, Integer mes) {
         Long idUsuario = UsuarioUtil.getIdUsuarioAutenticado();
@@ -56,7 +60,7 @@ public class DashboardService {
     private Date[] calcularPeriodo(int ano, Integer mes) {
         LocalDate inicio = mes != null ? LocalDate.of(ano, mes, 1) : LocalDate.of(ano, 1, 1);
         LocalDate fim = mes != null ? inicio.plusMonths(1) : inicio.plusYears(1);
-        ZoneId zone = ZoneId.systemDefault();
+        ZoneId zone = ZoneId.of(timeZone);
         return new Date[]{
             Date.from(inicio.atStartOfDay(zone).toInstant()),
             Date.from(fim.atStartOfDay(zone).toInstant())

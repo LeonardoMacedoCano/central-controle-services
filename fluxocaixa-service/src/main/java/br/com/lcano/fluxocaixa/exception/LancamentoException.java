@@ -11,6 +11,12 @@ public class LancamentoException extends RuntimeException {
         }
     }
 
+    public static class ItemLancamentoNaoEncontrado extends LancamentoException {
+        public ItemLancamentoNaoEncontrado(String tipo, Long lancamentoId) {
+            super(String.format("%s do lançamento %d não encontrada.", tipo, lancamentoId));
+        }
+    }
+
     public static class LancamentoTipoNaoSuportado extends LancamentoException {
         public LancamentoTipoNaoSuportado(String tipo) {
             super(String.format("Tipo de lançamento %s não suportado", tipo));
